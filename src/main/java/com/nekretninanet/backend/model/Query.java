@@ -28,8 +28,12 @@ public class Query {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "realEstateId", nullable = false)
+    @JoinColumn(name = "realEstateId")
     private RealEstate realEstate;
+
+
+    public Query() {
+    }
 
     public Query(LocalDate queryDate, String question, String response, String queryType, String status, User user, RealEstate realEstate) {
         this.queryDate = queryDate;
@@ -103,5 +107,20 @@ public class Query {
 
     public void setRealEstate(RealEstate realEstate) {
         this.realEstate = realEstate;
+    }
+
+
+    @Override
+    public String toString() {
+        return "Query{" +
+                "id=" + id +
+                ", queryDate=" + queryDate +
+                ", question='" + question + '\'' +
+                ", response='" + response + '\'' +
+                ", queryType='" + queryType + '\'' +
+                ", status='" + status + '\'' +
+                ", user=" + user +
+                ", realEstate=" + realEstate +
+                '}';
     }
 }

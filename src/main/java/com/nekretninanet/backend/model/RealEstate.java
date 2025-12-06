@@ -33,6 +33,10 @@ public class RealEstate {
     @JoinColumn(name = "userId", nullable = false)
     private User user;
 
+
+    public RealEstate() {
+    }
+
     public RealEstate(String title, Double price, String location, Double area, Integer yearBuilt, String description, LocalDate publishDate, String status, User user) {
         this.title = title;
         this.price = price;
@@ -123,5 +127,22 @@ public class RealEstate {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+
+    @Override
+    public String toString() {
+        return "RealEstate{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", price=" + price +
+                ", location='" + location + '\'' +
+                ", area=" + area +
+                ", yearBuilt=" + yearBuilt +
+                ", description='" + description + '\'' +
+                ", publishDate=" + publishDate +
+                ", status='" + status + '\'' +
+                ", user=" + user +
+                '}';
     }
 }

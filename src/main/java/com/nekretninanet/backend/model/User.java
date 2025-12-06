@@ -33,6 +33,10 @@ public class User {
     @Column(nullable = false)
     private UserType userType;
 
+
+    public User() {
+    }
+
     public User(String firstName, String lastName, String username, String hashPassword, String address, String email, String phoneNumber, UserType userType) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -114,5 +118,20 @@ public class User {
 
     public void setUserType(UserType userType) {
         this.userType = userType;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", username='" + username + '\'' +
+                ", hashPassword='" + hashPassword + '\'' +
+                ", address='" + address + '\'' +
+                ", email='" + email + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", userType=" + userType +
+                '}';
     }
 }

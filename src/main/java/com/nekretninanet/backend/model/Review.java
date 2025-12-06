@@ -27,6 +27,10 @@ public class Review {
     @JoinColumn(name = "realEstateId", nullable = false)
     private RealEstate realEstate;
 
+
+    public Review() {
+    }
+
     public Review(Integer rating, String comment, LocalDate date, String status, User user, RealEstate realEstate) {
         this.rating = rating;
         this.comment = comment;
@@ -90,5 +94,19 @@ public class Review {
 
     public void setRealEstate(RealEstate realEstate) {
         this.realEstate = realEstate;
+    }
+
+
+    @Override
+    public String toString() {
+        return "Review{" +
+                "id=" + id +
+                ", rating=" + rating +
+                ", comment='" + comment + '\'' +
+                ", date=" + date +
+                ", status='" + status + '\'' +
+                ", user=" + user +
+                ", realEstate=" + realEstate +
+                '}';
     }
 }
