@@ -6,6 +6,7 @@ import com.nekretninanet.backend.model.User;
 import com.nekretninanet.backend.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.Optional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -30,6 +31,17 @@ public class ReviewService {
         }
         reviewRepository.deleteById(reviewId);
     }
+
+    public Optional<Review> getReviewById(Long id) {
+    return reviewRepository.findById(id);
+}
+
+public Review saveReview(Review review) {
+    return reviewRepository.save(review);
+}
+
+
+
 
     public Review createReview(User user, RealEstate realEstate, Integer rating, String comment) {
         Review review = new Review();
