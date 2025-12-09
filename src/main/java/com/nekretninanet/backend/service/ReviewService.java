@@ -1,5 +1,7 @@
 package com.nekretninanet.backend.service;
 
+import com.nekretninanet.backend.dto.ReviewDTO;
+import com.nekretninanet.backend.exception.ResourceNotFoundException;
 import com.nekretninanet.backend.model.RealEstate;
 import com.nekretninanet.backend.model.Review;
 import com.nekretninanet.backend.model.User;
@@ -16,6 +18,30 @@ public class ReviewService {
     @Autowired
     private ReviewRepository reviewRepository;
 
+    public List<Review> getAllReviews() {
+        List<Review> reviews = reviewRepository.findAll();
+        if (reviews.isEmpty()) {
+            throw new ResourceNotFoundException("No reviews found.");
+        }
+        return reviews;
+    }
+
+    public List<ReviewDTO> getAllReviewsDTO() {
+        List<Review> reviews = reviewRepository.findAll();
+        if (reviews.isEmpty()) {
+            throw new ResourceNotFoundException("No reviews found.");
+        }
+
+        return reviews.stream()
+                .map(r -> new ReviewDTO(
+                        r.getRating(),
+                        r.getComment(),
+                        r.getDate(),
+                        r.getStatus(),
+                        r.getUser().getUsername()))
+                .toList();
+    }
+
     public List<Review> getReviewsByUserId(Long userId) {
         return reviewRepository.findByUserId(userId);
     }
@@ -24,11 +50,10 @@ public class ReviewService {
         return reviewRepository.findByUserUsername(username);
     }
 
-    public void deleteReview(Long reviewId) {
-        if (!reviewRepository.existsById(reviewId)) {
-            throw new RuntimeException("Review not found");
-        }
-        reviewRepository.deleteById(reviewId);
+    public void deleteReviewById(Long id) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Review with ID " + id + " not found."));
+        reviewRepository.delete(review);
     }
 
     public Review createReview(User user, RealEstate realEstate, Integer rating, String comment) {

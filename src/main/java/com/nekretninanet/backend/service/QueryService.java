@@ -1,9 +1,11 @@
 package com.nekretninanet.backend.service;
 
+import com.nekretninanet.backend.exception.ResourceNotFoundException;
 import com.nekretninanet.backend.model.Query;
 import com.nekretninanet.backend.model.RealEstate;
 import com.nekretninanet.backend.model.User;
 import com.nekretninanet.backend.repository.QueryRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,31 @@ public class QueryService {
 
     public List<Query> getQueriesByStatus(String status) {
         return queryRepository.findByStatus(status);
+    }
+
+    public List<Query> getAllSupportRequests() {
+        List<Query> requests = queryRepository.findByQueryType("support-request");
+
+        if (requests == null || requests.isEmpty()) {
+            throw new ResourceNotFoundException("No support requests found.");
+        }
+
+        return requests;
+    }
+
+    @Transactional
+    public Query respondToSupportRequest(Long id, String response) {
+        Query query = queryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Support request not found with id: " + id));
+
+        if (!"support-request".equals(query.getQueryType())) {
+            throw new IllegalArgumentException("Query is not a support request");
+        }
+
+        query.setResponse(response);
+        query.setStatus("CLOSED"); // dogovoriti se po potrebi za statuse
+
+        return queryRepository.save(query);
     }
 
     public Query updateQueryStatusAndResponse(Long id, String newStatus, String response) {
