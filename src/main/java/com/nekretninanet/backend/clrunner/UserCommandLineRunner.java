@@ -27,11 +27,11 @@ public class UserCommandLineRunner implements CommandLineRunner {
                 "123-456-789",
                 UserType.USER);
 
-        userService.createSupportUser(user);
+        userService.createRegularUser(user);
         //userService.createRegularUser(user);
 
         System.out.println("------------------------------------------------");
-        System.out.println(userService.getAllSupportUsers());
+     //   System.out.println(userService.getAllSupportUsers());
         System.out.println("------------------------------------------------");
 
     }
