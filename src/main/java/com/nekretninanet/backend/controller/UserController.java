@@ -1,10 +1,13 @@
 package com.nekretninanet.backend.controller;
 
 import com.nekretninanet.backend.dto.CreateSupportUserRequest;
+import com.nekretninanet.backend.dto.LoginRequestDto;
+import com.nekretninanet.backend.dto.RegisterRequestDto;
 import com.nekretninanet.backend.dto.UpdateUserDTO;
 import com.nekretninanet.backend.model.User;
 import com.nekretninanet.backend.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +21,18 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    @PostMapping("/auth/register")
+    public ResponseEntity<User> register(@RequestBody RegisterRequestDto dto) {
+        User user = userService.register(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    }
+
+    @PostMapping("/auth/login")
+    public ResponseEntity<User> login(@RequestBody LoginRequestDto dto) {
+        User user = userService.login(dto);
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping("/admin/support-accounts")

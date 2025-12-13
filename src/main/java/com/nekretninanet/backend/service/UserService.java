@@ -1,6 +1,8 @@
 package com.nekretninanet.backend.service;
 
 import com.nekretninanet.backend.dto.CreateSupportUserRequest;
+import com.nekretninanet.backend.dto.LoginRequestDto;
+import com.nekretninanet.backend.dto.RegisterRequestDto;
 import com.nekretninanet.backend.dto.UpdateUserDTO;
 import com.nekretninanet.backend.exception.BadRequestException;
 import com.nekretninanet.backend.exception.ResourceNotFoundException;
@@ -8,6 +10,7 @@ import com.nekretninanet.backend.model.User;
 import com.nekretninanet.backend.model.UserType;
 import com.nekretninanet.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +20,36 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public User register(RegisterRequestDto dto) {
+        if (userRepository.existsByUsername(dto.getUsername())) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+
+        User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setEmail(dto.getEmail());
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+
+        user.setHashPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setUserType(UserType.USER);
+
+        return userRepository.save(user);
+    }
+
+    public User login(LoginRequestDto dto) {
+        User user = userRepository.findByUsername(dto.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+
+        if (!passwordEncoder.matches(dto.getPassword(), user.getHashPassword())) {
+            throw new IllegalArgumentException("Invalid credentials");
+        }
+
+        return user;
+    }
 
     public List<User> getAllSupportUsers() {
         List<User> supportUsers = userRepository.findByUserType(UserType.SUPPORT);
