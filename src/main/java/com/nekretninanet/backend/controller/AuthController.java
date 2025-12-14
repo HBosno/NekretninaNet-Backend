@@ -31,19 +31,11 @@ public class AuthController {
 
 
     @PostMapping("/auth/register")
-    public ResponseEntity<User> register(@RequestBody RegisterRequestDto dto) {
-        User user = userService.register(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    public ResponseEntity<Void> register(@RequestBody RegisterRequestDto dto) {
+        userService.register(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    /*
-    @PostMapping("/auth/login")
-    public ResponseEntity<User> login(@RequestBody LoginRequestDto dto) {
-        User user = userService.login(dto);
-        return ResponseEntity.ok(user);
-    }
-
-     */
 
     @PostMapping("/auth/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto dto) {

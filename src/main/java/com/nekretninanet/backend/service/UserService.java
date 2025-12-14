@@ -20,10 +20,11 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public User register(RegisterRequestDto dto) {
+    public void register(RegisterRequestDto dto) {
         if (userRepository.existsByUsername(dto.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
         }
@@ -37,7 +38,7 @@ public class UserService {
         user.setHashPassword(passwordEncoder.encode(dto.getPassword()));
         user.setUserType(UserType.USER);
 
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
     public User login(LoginRequestDto dto) {
