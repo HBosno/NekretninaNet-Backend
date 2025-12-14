@@ -14,4 +14,6 @@ public interface QueryRepository extends JpaRepository<Query, Long> {
     List<Query> findByStatus(String status);
     List<Query> findByUser(User user);
     List<Query> findByUserAndRealEstate(User user, RealEstate realEstate);
+    List<Query> findByQueryType(String queryType);
+    List<Query> findByRealEstateIn(List<RealEstate> realEstate);
 }
