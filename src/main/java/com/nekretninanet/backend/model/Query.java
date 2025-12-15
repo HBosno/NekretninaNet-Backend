@@ -1,5 +1,7 @@
 package com.nekretninanet.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.nekretninanet.backend.view.QueryViews;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -9,26 +11,30 @@ public class Query {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonView({QueryViews.SupportRequestSummary.class, QueryViews.SupportRequestResponseSummary.class})
     private Long id;
 
     @Column(name = "query_date")
+    @JsonView(QueryViews.SupportRequestSummary.class)
     private LocalDate queryDate;
-
+    @JsonView(QueryViews.SupportRequestSummary.class)
     private String question;
-
+    @JsonView({QueryViews.SupportRequestSummary.class, QueryViews.SupportRequestResponseSummary.class})
     private String response;
 
     @Column(name = "query_type")
     private String queryType;
-
+    @JsonView({QueryViews.SupportRequestSummary.class, QueryViews.SupportRequestResponseSummary.class})
     private String status;
 
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false)
+    @JsonView(QueryViews.SupportRequestSummary.class)
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "realEstateId")
+    @JsonView(QueryViews.SupportRequestSummary.class)
     private RealEstate realEstate;
 
 

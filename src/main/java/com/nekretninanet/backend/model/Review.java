@@ -1,5 +1,7 @@
 package com.nekretninanet.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.nekretninanet.backend.view.ReviewViews;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -9,18 +11,20 @@ public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonView(ReviewViews.SupportReviewSummary.class)
     private Long id;
-
+    @JsonView(ReviewViews.SupportReviewSummary.class)
     private Integer rating;
-
+    @JsonView(ReviewViews.SupportReviewSummary.class)
     private String comment;
-
+    @JsonView(ReviewViews.SupportReviewSummary.class)
     private LocalDate date;
-
+    @JsonView(ReviewViews.SupportReviewSummary.class)
     private String status;
 
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false)
+    @JsonView(ReviewViews.SupportReviewSummary.class)
     private User user;
 
     @ManyToOne

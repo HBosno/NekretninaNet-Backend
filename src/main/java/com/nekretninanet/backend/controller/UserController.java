@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.nekretninanet.backend.view.UserViews;
 
 import java.util.List;
 
@@ -36,49 +38,61 @@ public class UserController {
     }
 
     @GetMapping("/admin/support-accounts")
+    @JsonView(UserViews.SupportAccountSummary.class)
     public ResponseEntity<List<User>> getAllSupportAccounts() {
         List<User> supportUsers = userService.getAllSupportUsers();
         return ResponseEntity.ok(supportUsers);
     }
 
     @PostMapping("/admin/support-accounts")
+    @JsonView(UserViews.SupportAccountSummary.class)
     public ResponseEntity<User> createSupportAccount(@RequestBody @Valid CreateSupportUserRequest request) {
         User created = userService.createSupportUser(request);
         return ResponseEntity.ok(created);
     }
 
-    @PatchMapping("/admin/support-accounts/{username}")
+    @PatchMapping("/admin/support-accounts/{id}")
+    @JsonView(UserViews.SupportAccountSummary.class)
     public ResponseEntity<User> updateSupportAccount(
-            @PathVariable String username,
+            @PathVariable Long id,
             @RequestBody @Valid UpdateUserDTO dto) {
-        User updatedUser = userService.updateSupportUser(username, dto);
+        User updatedUser = userService.updateSupportUser(id, dto);
         return ResponseEntity.ok(updatedUser);
     }
 
-    @DeleteMapping("/admin/support-accounts/{username}")
-    public ResponseEntity<Void> deleteSupportAccount(@PathVariable String username) {
-        userService.deleteSupportUser(username);
+    @DeleteMapping("/admin/support-accounts/{id}")
+    public ResponseEntity<Void> deleteSupportAccount(@PathVariable Long id) {
+        userService.deleteSupportUser(id);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/support/regular-users-accounts")
+    @JsonView(UserViews.RegularUserSummary.class)
     public ResponseEntity<List<User>> getAllRegularUsers() {
         List<User> regularUsers = userService.getAllRegularUsers();
         return ResponseEntity.ok(regularUsers);
     }
 
-    @PatchMapping("/support/regular-users-accounts/{username}")
+    @PatchMapping("/support/regular-users-accounts/{id}")
+    @JsonView(UserViews.RegularUserSummary.class)
     public ResponseEntity<User> updateRegularUserBySupport(
-            @PathVariable String username,
+            @PathVariable Long id,
             @RequestBody UpdateUserDTO dto) {
-        User updatedUser = userService.updateRegularUser(username, dto);
+        User updatedUser = userService.updateRegularUser(id, dto);
         return ResponseEntity.ok(updatedUser);
     }
 
-    @DeleteMapping("/support/regular-users-accounts/{username}")
-    public ResponseEntity<Void> deleteRegularUserBySupport(@PathVariable String username) {
-        userService.deleteRegularUser(username);
+    @DeleteMapping("/support/regular-users-accounts/{id}")
+    public ResponseEntity<Void> deleteRegularUserBySupport(@PathVariable Long id) {
+        userService.deleteRegularUser(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/user/account/{id}")
+    @JsonView(UserViews.RegularUserSummary.class)
+    public ResponseEntity<User> getRegularUserById(@PathVariable Long id) {
+        User user = userService.getRegularUserById(id);
+        return ResponseEntity.ok(user);
     }
 
     /*
@@ -86,18 +100,18 @@ public class UserController {
         gore SUPPORT, ovdje USER. taj dio se negdje drugo obezbjedjuje. spring security?/ autentikacija i autorizacija,
         role based access
     */
-    @PatchMapping("/user/account/{username}")
+    @PatchMapping("/user/account/{id}")
     public ResponseEntity<User> updateRegularUserByRegular(
-            @PathVariable String username,
+            @PathVariable Long id,
             @RequestBody UpdateUserDTO dto) {
-        User updatedUser = userService.updateRegularUser(username, dto);
-        return ResponseEntity.ok(updatedUser);
+        userService.updateRegularUser(id, dto);
+        return ResponseEntity.noContent().build();
     }
 
     // analogno kao za prethodni endpoint. vec postoji identicna logika za delete /support/regular-users-accounts/{username}
-    @DeleteMapping("/user/account/{username}")
-    public ResponseEntity<Void> deleteRegularUserByRegular(@PathVariable String username) {
-        userService.deleteRegularUser(username);
+    @DeleteMapping("/user/account/{id}")
+    public ResponseEntity<Void> deleteRegularUserByRegular(@PathVariable Long id) {
+        userService.deleteRegularUser(id);
         return ResponseEntity.ok().build();
     }
 }

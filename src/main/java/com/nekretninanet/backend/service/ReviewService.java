@@ -27,28 +27,16 @@ public class ReviewService {
         return reviews;
     }
 
-    public List<ReviewDTO> getAllReviewsDTO() {
-        List<Review> reviews = reviewRepository.findAll();
-        if (reviews.isEmpty()) {
-            throw new ResourceNotFoundException("No reviews found.");
-        }
-
-        return reviews.stream()
-                .map(r -> new ReviewDTO(
-                        r.getRating(),
-                        r.getComment(),
-                        r.getDate(),
-                        r.getStatus(),
-                        r.getUser().getUsername()))
-                .toList();
-    }
-
     public List<Review> getReviewsByUserId(Long userId) {
         return reviewRepository.findByUserId(userId);
     }
 
     public List<Review> getReviewsByUsername(String username) {
-        return reviewRepository.findByUserUsername(username);
+        List<Review> reviews = reviewRepository.findByUserUsername(username);
+        if (reviews.isEmpty()) {
+            throw new ResourceNotFoundException("No reviews found for user: " + username);
+        }
+        return reviews;
     }
 
     public void deleteReview(Long id) {

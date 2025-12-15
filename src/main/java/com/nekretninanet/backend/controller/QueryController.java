@@ -1,8 +1,10 @@
 package com.nekretninanet.backend.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.nekretninanet.backend.dto.SupportRequestResponseDto;
 import com.nekretninanet.backend.model.Query;
 import com.nekretninanet.backend.service.QueryService;
+import com.nekretninanet.backend.view.QueryViews;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RestController;
 import com.nekretninanet.backend.model.RealEstate;
@@ -33,6 +35,7 @@ public class QueryController {
     }
 
     @GetMapping("/support/requests")
+    @JsonView(QueryViews.SupportRequestSummary.class)
     public ResponseEntity<List<Query>> getAllSupportRequests() {
         List<Query> requests = queryService.getAllSupportRequests();
         return ResponseEntity.ok(requests);

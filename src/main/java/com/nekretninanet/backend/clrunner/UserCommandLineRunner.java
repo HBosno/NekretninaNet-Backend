@@ -1,5 +1,6 @@
 package com.nekretninanet.backend.clrunner;
 
+import com.nekretninanet.backend.dto.CreateSupportUserRequest;
 import com.nekretninanet.backend.model.User;
 import com.nekretninanet.backend.model.UserType;
 import com.nekretninanet.backend.service.UserService;
@@ -17,7 +18,19 @@ public class UserCommandLineRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        /*
+        CreateSupportUserRequest user = new CreateSupportUserRequest("Test Name",
+                "Test lastName",
+                "test",
+                "test",
+                "test",
+                "mailtest",
+                "123-456-789"
+                );
 
+        userService.createSupportUser(user);
+        //userService.createRegularUser(user);
+*/
         User user = new User("Test Name",
                 "Test lastName",
                 "test",
@@ -25,11 +38,10 @@ public class UserCommandLineRunner implements CommandLineRunner {
                 "test",
                 "mailtest",
                 "123-456-789",
-                UserType.USER);
+                UserType.USER
+        );
 
         userService.createRegularUser(user);
-        //userService.createRegularUser(user);
-
         System.out.println("------------------------------------------------");
      //   System.out.println(userService.getAllSupportUsers());
         System.out.println("------------------------------------------------");

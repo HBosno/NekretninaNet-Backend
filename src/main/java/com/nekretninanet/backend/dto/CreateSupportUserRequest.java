@@ -15,7 +15,7 @@ public class CreateSupportUserRequest {
     private String username;
 
     @NotBlank
-    private String hashPassword;
+    private String password;
 
     private String address;
 
@@ -36,8 +36,8 @@ public class CreateSupportUserRequest {
         return username;
     }
 
-    public String getHashPassword() {
-        return hashPassword;
+    public String getPassword() {
+        return password;
     }
 
     public String getAddress() {

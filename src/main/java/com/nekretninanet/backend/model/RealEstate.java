@@ -1,5 +1,7 @@
 package com.nekretninanet.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.nekretninanet.backend.view.QueryViews;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -10,7 +12,7 @@ public class RealEstate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @JsonView(QueryViews.SupportRequestSummary.class)
     private String title;
 
     private Double price;
@@ -31,6 +33,7 @@ public class RealEstate {
 
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false)
+    @JsonView(QueryViews.SupportRequestSummary.class)
     private User user;
 
 

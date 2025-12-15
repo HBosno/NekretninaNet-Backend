@@ -1,8 +1,10 @@
 package com.nekretninanet.backend.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.nekretninanet.backend.dto.ReviewDTO;
 import com.nekretninanet.backend.model.Review;
 import com.nekretninanet.backend.service.ReviewService;
+import com.nekretninanet.backend.view.ReviewViews;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.nekretninanet.backend.model.User;
@@ -32,8 +34,10 @@ public class ReviewController {
     }
 
     @GetMapping("/support/reviews")
-    public ResponseEntity<List<ReviewDTO>> getAllReviews() {
-        List<ReviewDTO> reviews = reviewService.getAllReviewsDTO();
+    @JsonView(ReviewViews.SupportReviewSummary.class)
+    public ResponseEntity<List<Review>> getReviewsByUsername(
+            @RequestParam String username) {
+        List<Review> reviews = reviewService.getReviewsByUsername(username);
         return ResponseEntity.ok(reviews);
     }
 
