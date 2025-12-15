@@ -4,6 +4,10 @@ import com.nekretninanet.backend.model.RealEstate;
 import com.nekretninanet.backend.model.User;
 import com.nekretninanet.backend.repository.RealEstateRepository;
 import com.nekretninanet.backend.repository.UserRepository;
+import com.nekretninanet.backend.model.Query;
+import com.nekretninanet.backend.model.Review;
+import com.nekretninanet.backend.repository.QueryRepository;
+import com.nekretninanet.backend.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +20,8 @@ public class RealEstateService {
 
     private final RealEstateRepository realEstateRepository;
     private final UserRepository userRepository;
+    private final QueryRepository queryRepository;
+    private final ReviewRepository reviewRepository;
 
     public List<RealEstate> getAllRealEstatesFiltered(Double minPrice, Double maxPrice,
                                                       String location, Double minArea, Double maxArea) {
@@ -28,9 +34,11 @@ public class RealEstateService {
                 .collect(Collectors.toList());
     }
 
-    public RealEstateService (RealEstateRepository realEstateRepository, UserRepository userRepository){
+    public RealEstateService (RealEstateRepository realEstateRepository, UserRepository userRepository, QueryRepository queryRepository, ReviewRepository reviewRepository){
         this.realEstateRepository=realEstateRepository;
         this.userRepository=userRepository;
+        this.queryRepository=queryRepository;
+        this.reviewRepository=reviewRepository;
     }
 
     public List<RealEstate> filterRealEstates(Double minPrice, Double maxPrice, String location, Integer yearBuilt){
@@ -104,6 +112,27 @@ public List<RealEstate> getByUsername(String username) {
     return realEstateRepository.save(existing);
 }
 
+public List<RealEstate> getByUserId(Long userId) {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    return realEstateRepository.findByUser(user);
+}
+
+public User getUserById(Long userId) {
+    return userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+}
+
+public RealEstate getRealEstateById(Long id) {
+    return realEstateRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Real estate not found"));
+}
+
+public RealEstate updateRealEstatePartial(RealEstate realEstate) {
+    return realEstateRepository.save(realEstate);
+}
+
 
     public RealEstate updateRealEstate(Long id, RealEstate newData) {
         RealEstate existing = realEstateRepository.findById(id)
@@ -119,4 +148,27 @@ public List<RealEstate> getByUsername(String username) {
 
         return realEstateRepository.save(existing);
     }
+
+    public void deleteRealEstateCascading(Long id) {
+    // 1️⃣ Dohvati nekretninu
+    RealEstate realEstate = realEstateRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Real estate not found"));
+
+    try {
+        // 2️⃣ Obriši sve upite vezane za nekretninu
+        List<Query> queries = queryRepository.findByRealEstateIn(List.of(realEstate));
+        queryRepository.deleteAll(queries);
+
+        // 3️⃣ Obriši sve recenzije vezane za nekretninu
+        List<Review> reviews = reviewRepository.findByRealEstateId(id);
+        reviewRepository.deleteAll(reviews);
+
+        // 4️⃣ Obriši samu nekretninu
+        realEstateRepository.delete(realEstate);
+
+    } catch (Exception e) {
+        throw new RuntimeException("Error during cascading delete: " + e.getMessage());
+    }
+}
+
 }

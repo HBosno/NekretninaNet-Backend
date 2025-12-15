@@ -11,24 +11,29 @@ import com.nekretninanet.backend.repository.UserRepository;
 import com.nekretninanet.backend.repository.RealEstateRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PatchMapping;
+import com.nekretninanet.backend.dto.ReviewRequestDTO;
+import com.nekretninanet.backend.repository.ReviewRepository;
 
 import java.util.List;
 import java.util.Map;
 import java.time.LocalDate;
-
+import java.util.Optional;
 @RestController
 @RequestMapping("/")
 public class ReviewController {
     private final ReviewService reviewService;
     private final UserRepository userRepository;
     private final RealEstateRepository realEstateRepository;
+    private final ReviewRepository reviewRepository;
 
     public ReviewController(ReviewService reviewService,
                             UserRepository userRepository,
-                            RealEstateRepository realEstateRepository) {
+                            RealEstateRepository realEstateRepository,
+                            ReviewRepository reviewRepository) {
         this.reviewService = reviewService;
         this.userRepository = userRepository;
         this.realEstateRepository = realEstateRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     @GetMapping("/support/reviews")
@@ -42,81 +47,119 @@ public class ReviewController {
         reviewService.deleteReview(id);
         return ResponseEntity.noContent().build();
     }
+@PostMapping("/user/review/{userId}/{realEstateId}")
+public ResponseEntity<?> createReview(
+        @PathVariable Long userId,
+        @PathVariable Long realEstateId,
+        @RequestBody ReviewRequestDTO body
+) {
+    try {
+        Integer rating = body.getRating();
+        String comment = body.getComment();
 
-    @PostMapping("/user/review")
-    public ResponseEntity<?> createReview(@RequestBody Map<String, Object> body) {
-        try {
-            Long userId = Long.valueOf(body.get("userId").toString());
-            Long realEstateId = Long.valueOf(body.get("realEstateId").toString());
-            Integer rating = Integer.valueOf(body.get("rating").toString());
-            String comment = (String) body.get("comment");
-
-            if (rating == null || comment == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Rating and comment are required");
-            }
-
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            RealEstate realEstate = realEstateRepository.findById(realEstateId)
-                    .orElseThrow(() -> new RuntimeException("Real estate not found"));
-
-            Review review = reviewService.createReview(user, realEstate, rating, comment);
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(review);
-
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error creating review");
+        if (rating == null || comment == null || comment.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Rating and comment are required");
         }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        RealEstate realEstate = realEstateRepository.findById(realEstateId)
+                .orElseThrow(() -> new RuntimeException("Real estate not found"));
+
+        Review review = new Review();
+        review.setUser(user);
+        review.setRealEstate(realEstate);
+        review.setRating(rating);
+        review.setComment(comment);
+        review.setDate(LocalDate.now());  // automatski današnji datum
+        review.setStatus("ACTIVE");       // inicijalni status
+
+        Review savedReview = reviewRepository.save(review);
+
+        // Kreiranje DTO za povrat
+        ReviewDTO responseDTO = new ReviewDTO(
+                savedReview.getRating(),
+                savedReview.getComment(),
+                savedReview.getDate(),
+                savedReview.getStatus(),
+                savedReview.getUser().getUsername()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error creating review");
     }
+}
 
     @PatchMapping("/user/review/{id}")
-    public ResponseEntity<?> updateReview(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
-        try {
-            Review review = reviewService.getReviewById(id)
-                    .orElseThrow(() -> new RuntimeException("Review not found"));
+public ResponseEntity<?> updateReview(
+        @PathVariable Long id,
+        @RequestBody ReviewRequestDTO body
+) {
+    try {
+        Review review = reviewService.getReviewById(id)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
 
-            // Ažuriranje polja ako su prisutna u body-ju
-            if (updates.containsKey("rating")) {
-                review.setRating(Integer.valueOf(updates.get("rating").toString()));
-            }
-            if (updates.containsKey("comment")) {
-                review.setComment((String) updates.get("comment"));
-            }
-            if (updates.containsKey("status")) {
-                review.setStatus((String) updates.get("status"));
-            }
-            if (updates.containsKey("date")) {
-                review.setDate(LocalDate.parse((String) updates.get("date")));
-            }
-
-            Review updatedReview = reviewService.saveReview(review);
-
-            return ResponseEntity.ok(updatedReview);
-
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error updating review");
+        // Ažuriranje samo rating i comment
+        if (body.getRating() != null) {
+            review.setRating(body.getRating());
         }
+        if (body.getComment() != null && !body.getComment().isEmpty()) {
+            review.setComment(body.getComment());
+        }
+
+        // Automatski postavljamo današnji datum
+        review.setDate(LocalDate.now());
+
+        Review updatedReview = reviewService.saveReview(review);
+
+        // Mapiranje u DTO za povrat
+        ReviewDTO responseDTO = new ReviewDTO(
+                updatedReview.getRating(),
+                updatedReview.getComment(),
+                updatedReview.getDate(),
+                updatedReview.getStatus(),
+                updatedReview.getUser().getUsername()
+        );
+
+        return ResponseEntity.ok(responseDTO);
+
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error updating review");
     }
+}
+
 
     @DeleteMapping("/user/review/{id}")
-    public ResponseEntity<?> deleteReviewByUser(@PathVariable Long id) {
-        try {
-            reviewService.deleteReview(id);
-            return ResponseEntity.ok("Review successfully deleted");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error deleting review");
+public ResponseEntity<?> deleteReviewByUser(@PathVariable Long id) {
+    try {
+        // Provjeri da li review postoji
+        Optional<Review> reviewOptional = reviewService.getReviewById(id);
+        if (reviewOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Review with ID " + id + " not found.");
         }
+
+        // Obriši review
+        reviewService.deleteReview(id);
+
+        return ResponseEntity.ok("Review successfully deleted");
+
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error deleting review: " + e.getMessage());
     }
+}
+
+
 
     @GetMapping("/user/real-estate/reviews/{id}")
     public ResponseEntity<List<Review>> getReviewsByRealEstateId(@PathVariable Long id) {
