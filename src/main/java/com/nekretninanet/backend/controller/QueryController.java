@@ -10,19 +10,25 @@ import com.nekretninanet.backend.service.QueryService;
 import com.nekretninanet.backend.view.QueryViews;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RestController;
+import com.nekretninanet.backend.model.Query;
+import com.nekretninanet.backend.model.QueryStatus;
+import com.nekretninanet.backend.model.QueryType;
+import com.nekretninanet.backend.model.RealEstate;
+import com.nekretninanet.backend.model.User;
 import com.nekretninanet.backend.repository.RealEstateRepository;
 import com.nekretninanet.backend.repository.UserRepository;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/")
 public class QueryController {
+
     private final QueryService queryService;
     private final QueryRepository queryRepository;
     private final UserRepository userRepository;
@@ -207,4 +213,5 @@ public class QueryController {
                     .body("Error creating support request");
         }
     }
+
 }

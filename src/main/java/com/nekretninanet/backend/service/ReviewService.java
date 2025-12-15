@@ -6,6 +6,7 @@ import com.nekretninanet.backend.model.RealEstate;
 import com.nekretninanet.backend.model.Review;
 import com.nekretninanet.backend.model.ReviewStatus;
 import com.nekretninanet.backend.model.User;
+import com.nekretninanet.backend.model.ReviewStatus;
 import com.nekretninanet.backend.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,9 +56,6 @@ public class ReviewService {
     public Review saveReview(Review review) {
         return reviewRepository.save(review);
     }
-
-
-
 
     public Review createReview(User user, RealEstate realEstate, Integer rating, String comment) {
         Review review = new Review();

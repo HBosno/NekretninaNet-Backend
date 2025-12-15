@@ -8,7 +8,6 @@ import java.util.List;
 
 @Repository
 public interface QueryRepository extends JpaRepository<Query, Long> {
-
     List<Query> findByStatus(QueryStatus status);
     List<Query> findByUser(User user);
     List<Query> findByUserAndRealEstate(User user, RealEstate realEstate);

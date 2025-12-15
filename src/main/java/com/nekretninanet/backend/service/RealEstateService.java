@@ -5,7 +5,6 @@ import com.nekretninanet.backend.repository.QueryRepository;
 import com.nekretninanet.backend.repository.RealEstateRepository;
 import com.nekretninanet.backend.repository.ReviewRepository;
 import com.nekretninanet.backend.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -30,6 +29,7 @@ public class RealEstateService {
         this.reviewRepository = reviewRepository;
     }
 
+    // Filtriranje nekretnina po parametrima
     public List<RealEstate> getAllRealEstatesFiltered(Double minPrice, Double maxPrice,
                                                       String location, Double minArea, Double maxArea) {
         return realEstateRepository.findAll().stream()
@@ -94,7 +94,6 @@ public class RealEstateService {
 
         return realEstateRepository.save(existing);
     }
-
 
     // Ažuriranje nekretnine sa id-em
     public RealEstate updateRealEstate(Long id, RealEstate newData) {

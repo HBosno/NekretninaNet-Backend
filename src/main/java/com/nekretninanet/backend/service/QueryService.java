@@ -3,10 +3,10 @@ package com.nekretninanet.backend.service;
 import com.nekretninanet.backend.exception.ResourceNotFoundException;
 import com.nekretninanet.backend.model.*;
 import com.nekretninanet.backend.repository.QueryRepository;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.stereotype.Service;
 import com.nekretninanet.backend.repository.RealEstateRepository;
 import com.nekretninanet.backend.repository.UserRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,7 +19,8 @@ public class QueryService {
     private final UserRepository userRepository;
 
     public QueryService(QueryRepository queryRepository,
-                        RealEstateRepository realEstateRepository, UserRepository userRepository) {
+                        RealEstateRepository realEstateRepository,
+                        UserRepository userRepository) {
         this.queryRepository = queryRepository;
         this.realEstateRepository = realEstateRepository;
         this.userRepository = userRepository;

@@ -7,29 +7,30 @@ import com.nekretninanet.backend.model.Review;
 import com.nekretninanet.backend.model.ReviewStatus;
 import com.nekretninanet.backend.service.ReviewService;
 import com.nekretninanet.backend.view.ReviewViews;
+import com.nekretninanet.backend.model.RealEstate;
+import com.nekretninanet.backend.model.User;
+import com.nekretninanet.backend.repository.RealEstateRepository;
+import com.nekretninanet.backend.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.nekretninanet.backend.model.User;
-import com.nekretninanet.backend.model.RealEstate;
-import com.nekretninanet.backend.repository.UserRepository;
-import com.nekretninanet.backend.repository.RealEstateRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PatchMapping;
 
-import java.util.List;
-import java.util.Map;
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/")
 public class ReviewController {
+
     private final ReviewService reviewService;
     private final UserRepository userRepository;
     private final RealEstateRepository realEstateRepository;
 
-    public ReviewController(ReviewService reviewService,
-                            UserRepository userRepository,
-                            RealEstateRepository realEstateRepository) {
+    public ReviewController(
+            ReviewService reviewService,
+            UserRepository userRepository,
+            RealEstateRepository realEstateRepository
+    ) {
         this.reviewService = reviewService;
         this.userRepository = userRepository;
         this.realEstateRepository = realEstateRepository;

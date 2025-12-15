@@ -38,7 +38,6 @@ public class Query {
     @JsonView(QueryViews.SupportRequestSummary.class)
     private RealEstate realEstate;
 
-
     public Query() {
     }
 
@@ -74,10 +73,8 @@ public class Query {
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
-
     public RealEstate getRealEstate() { return realEstate; }
     public void setRealEstate(RealEstate realEstate) { this.realEstate = realEstate; }
-
 
     @Override
     public String toString() {

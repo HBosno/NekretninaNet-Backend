@@ -32,7 +32,6 @@ public class Review {
     @JoinColumn(name = "realEstateId", nullable = false)
     private RealEstate realEstate;
 
-
     public Review() {
     }
 
@@ -54,10 +53,6 @@ public class Review {
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Integer getRating() {

@@ -12,7 +12,6 @@ import java.util.List;
 
 @Repository
 public interface RealEstateRepository extends JpaRepository<RealEstate, Long> {
-
     List<RealEstate> findByUser(User user);
     List<RealEstate> findByStatus(RealEstateStatus status);
     List<RealEstate> findByUserUsername(String username);
@@ -32,6 +31,4 @@ public interface RealEstateRepository extends JpaRepository<RealEstate, Long> {
             @Param("status") RealEstateStatus status
     );
     List<RealEstate> findByTitleContainingIgnoreCaseAndStatus(String title, RealEstateStatus status);
-
-
 }

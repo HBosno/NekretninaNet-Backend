@@ -37,7 +37,6 @@ public class RealEstate {
     @JsonView(QueryViews.SupportRequestSummary.class)
     private User user;
 
-
     public RealEstate() {
     }
 
@@ -132,7 +131,6 @@ public class RealEstate {
     public void setUser(User user) {
         this.user = user;
     }
-
 
     @Override
     public String toString() {
