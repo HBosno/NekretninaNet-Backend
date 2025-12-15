@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "querie")
+@Table(name = "queries") // Preporučujem plural, ranije je bilo "querie"
 public class Query {
 
     @Id
@@ -18,10 +18,12 @@ public class Query {
 
     private String response;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "query_type")
-    private String queryType;
+    private QueryType queryType;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private QueryStatus status;
 
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false)
@@ -31,11 +33,11 @@ public class Query {
     @JoinColumn(name = "realEstateId")
     private RealEstate realEstate;
 
-
     public Query() {
     }
 
-    public Query(LocalDate queryDate, String question, String response, String queryType, String status, User user, RealEstate realEstate) {
+    public Query(LocalDate queryDate, String question, String response, QueryType queryType,
+                 QueryStatus status, User user, RealEstate realEstate) {
         this.queryDate = queryDate;
         this.question = question;
         this.response = response;
@@ -45,70 +47,30 @@ public class Query {
         this.realEstate = realEstate;
     }
 
-    public Long getId() {
-        return id;
-    }
+    // Getteri i setteri
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public LocalDate getQueryDate() { return queryDate; }
+    public void setQueryDate(LocalDate queryDate) { this.queryDate = queryDate; }
 
-    public LocalDate getQueryDate() {
-        return queryDate;
-    }
+    public String getQuestion() { return question; }
+    public void setQuestion(String question) { this.question = question; }
 
-    public void setQueryDate(LocalDate queryDate) {
-        this.queryDate = queryDate;
-    }
+    public String getResponse() { return response; }
+    public void setResponse(String response) { this.response = response; }
 
-    public String getQuestion() {
-        return question;
-    }
+    public QueryType getQueryType() { return queryType; }
+    public void setQueryType(QueryType queryType) { this.queryType = queryType; }
 
-    public void setQuestion(String question) {
-        this.question = question;
-    }
+    public QueryStatus getStatus() { return status; }
+    public void setStatus(QueryStatus status) { this.status = status; }
 
-    public String getResponse() {
-        return response;
-    }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
-    public void setResponse(String response) {
-        this.response = response;
-    }
-
-    public String getQueryType() {
-        return queryType;
-    }
-
-    public void setQueryType(String queryType) {
-        this.queryType = queryType;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public RealEstate getRealEstate() {
-        return realEstate;
-    }
-
-    public void setRealEstate(RealEstate realEstate) {
-        this.realEstate = realEstate;
-    }
-
+    public RealEstate getRealEstate() { return realEstate; }
+    public void setRealEstate(RealEstate realEstate) { this.realEstate = realEstate; }
 
     @Override
     public String toString() {
@@ -117,8 +79,8 @@ public class Query {
                 ", queryDate=" + queryDate +
                 ", question='" + question + '\'' +
                 ", response='" + response + '\'' +
-                ", queryType='" + queryType + '\'' +
-                ", status='" + status + '\'' +
+                ", queryType=" + queryType +
+                ", status=" + status +
                 ", user=" + user +
                 ", realEstate=" + realEstate +
                 '}';

@@ -27,17 +27,17 @@ public class RealEstate {
     @Column(name = "publish_date")
     private LocalDate publishDate;
 
-    private String status;
+    @Enumerated(EnumType.STRING)  // Ova anotacija omogućava da se enum mapira na string u bazi
+    private RealEstateStatus status;
 
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false)
     private User user;
 
-
     public RealEstate() {
     }
 
-    public RealEstate(String title, Double price, String location, Double area, Integer yearBuilt, String description, LocalDate publishDate, String status, User user) {
+    public RealEstate(String title, Double price, String location, Double area, Integer yearBuilt, String description, LocalDate publishDate, RealEstateStatus status, User user) {
         this.title = title;
         this.price = price;
         this.location = location;
@@ -113,11 +113,11 @@ public class RealEstate {
         this.publishDate = publishDate;
     }
 
-    public String getStatus() {
+    public RealEstateStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(RealEstateStatus status) {
         this.status = status;
     }
 
@@ -128,7 +128,6 @@ public class RealEstate {
     public void setUser(User user) {
         this.user = user;
     }
-
 
     @Override
     public String toString() {
@@ -141,7 +140,7 @@ public class RealEstate {
                 ", yearBuilt=" + yearBuilt +
                 ", description='" + description + '\'' +
                 ", publishDate=" + publishDate +
-                ", status='" + status + '\'' +
+                ", status=" + status +
                 ", user=" + user +
                 '}';
     }

@@ -17,7 +17,8 @@ public class Review {
 
     private LocalDate date;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private ReviewStatus status;
 
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false)
@@ -27,11 +28,17 @@ public class Review {
     @JoinColumn(name = "realEstateId", nullable = false)
     private RealEstate realEstate;
 
-
     public Review() {
     }
 
-    public Review(Integer rating, String comment, LocalDate date, String status, User user, RealEstate realEstate) {
+    public Review(
+            Integer rating,
+            String comment,
+            LocalDate date,
+            ReviewStatus status,
+            User user,
+            RealEstate realEstate
+    ) {
         this.rating = rating;
         this.comment = comment;
         this.date = date;
@@ -42,10 +49,6 @@ public class Review {
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Integer getRating() {
@@ -72,11 +75,11 @@ public class Review {
         this.date = date;
     }
 
-    public String getStatus() {
+    public ReviewStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(ReviewStatus status) {
         this.status = status;
     }
 
@@ -94,19 +97,5 @@ public class Review {
 
     public void setRealEstate(RealEstate realEstate) {
         this.realEstate = realEstate;
-    }
-
-
-    @Override
-    public String toString() {
-        return "Review{" +
-                "id=" + id +
-                ", rating=" + rating +
-                ", comment='" + comment + '\'' +
-                ", date=" + date +
-                ", status='" + status + '\'' +
-                ", user=" + user +
-                ", realEstate=" + realEstate +
-                '}';
     }
 }

@@ -5,6 +5,7 @@ import com.nekretninanet.backend.exception.ResourceNotFoundException;
 import com.nekretninanet.backend.model.RealEstate;
 import com.nekretninanet.backend.model.Review;
 import com.nekretninanet.backend.model.User;
+import com.nekretninanet.backend.model.ReviewStatus;
 import com.nekretninanet.backend.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,35 +39,27 @@ public class ReviewService {
                         r.getRating(),
                         r.getComment(),
                         r.getDate(),
-                        r.getStatus(),
-                        r.getUser().getUsername()))
+                        r.getStatus().name(),
+                        r.getUser().getUsername()
+                ))
                 .toList();
     }
 
-    public List<Review> getReviewsByUserId(Long userId) {
-        return reviewRepository.findByUserId(userId);
+    public Optional<Review> getReviewById(Long id) {
+        return reviewRepository.findById(id);
     }
 
-    public List<Review> getReviewsByUsername(String username) {
-        return reviewRepository.findByUserUsername(username);
+    public Review saveReview(Review review) {
+        return reviewRepository.save(review);
     }
 
     public void deleteReview(Long id) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Review with ID " + id + " not found."));
-        reviewRepository.delete(review);
+
+        review.setStatus(ReviewStatus.REMOVED);
+        reviewRepository.save(review);
     }
-
-    public Optional<Review> getReviewById(Long id) {
-    return reviewRepository.findById(id);
-}
-
-public Review saveReview(Review review) {
-    return reviewRepository.save(review);
-}
-
-
-
 
     public Review createReview(User user, RealEstate realEstate, Integer rating, String comment) {
         Review review = new Review();
@@ -75,7 +68,8 @@ public Review saveReview(Review review) {
         review.setRating(rating);
         review.setComment(comment);
         review.setDate(LocalDate.now());
-        review.setStatus("PENDING");
+        review.setStatus(ReviewStatus.ACTIVE);
+
         return reviewRepository.save(review);
     }
 
@@ -83,7 +77,7 @@ public Review saveReview(Review review) {
         return reviewRepository.findByRealEstateId(realEstateId);
     }
 
-    public Review updateReview(Long reviewId, Integer rating, String comment, String status) {
+    public Review updateReview(Long reviewId, Integer rating, String comment, ReviewStatus status) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
 
