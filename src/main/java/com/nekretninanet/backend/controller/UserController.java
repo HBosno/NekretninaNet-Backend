@@ -25,17 +25,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/auth/register")
-    public ResponseEntity<User> register(@RequestBody RegisterRequestDto dto) {
-        User user = userService.register(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
-    }
-
-    @PostMapping("/auth/login")
-    public ResponseEntity<User> login(@RequestBody LoginRequestDto dto) {
-        User user = userService.login(dto);
-        return ResponseEntity.ok(user);
-    }
 
     @GetMapping("/admin/support-accounts")
     @JsonView(UserViews.SupportAccountSummary.class)
