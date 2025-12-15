@@ -1,9 +1,7 @@
 package com.nekretninanet.backend.service;
 
 import com.nekretninanet.backend.exception.ResourceNotFoundException;
-import com.nekretninanet.backend.model.Query;
-import com.nekretninanet.backend.model.RealEstate;
-import com.nekretninanet.backend.model.User;
+import com.nekretninanet.backend.model.*;
 import com.nekretninanet.backend.repository.QueryRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -27,12 +25,12 @@ public class QueryService {
         this.userRepository = userRepository;
     }
 
-    public List<Query> getQueriesByStatus(String status) {
+    public List<Query> getQueriesByStatus(QueryStatus status) {
         return queryRepository.findByStatus(status);
     }
 
     public List<Query> getAllSupportRequests() {
-        List<Query> requests = queryRepository.findByQueryType("support-request");
+        List<Query> requests = queryRepository.findByQueryType(QueryType.SUPPORT_REQUEST);
 
         if (requests == null || requests.isEmpty()) {
             throw new ResourceNotFoundException("No support requests found.");
@@ -46,12 +44,12 @@ public class QueryService {
         Query query = queryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Support request not found with id: " + id));
 
-        if (!"support-request".equals(query.getQueryType())) {
+        if (query.getQueryType() != QueryType.SUPPORT_REQUEST) {
             throw new IllegalArgumentException("Query is not a support request");
         }
 
         query.setResponse(response);
-        query.setStatus("CLOSED"); // dogovoriti se po potrebi za statuse
+        query.setStatus(QueryStatus.ANSWERED);
 
         return queryRepository.save(query);
     }
@@ -80,7 +78,7 @@ public class QueryService {
         return queryRepository.findByRealEstateIn(userEstates);
     }
 
-    public Query updateQueryStatusAndResponse(Long id, String newStatus, String response) {
+    public Query updateQueryStatusAndResponse(Long id, QueryStatus newStatus, String response) {
         Query query = queryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Query not found"));
 
@@ -90,25 +88,25 @@ public class QueryService {
         return queryRepository.save(query);
     }
 
-    public Query createRealEstateQuery(User user, RealEstate realEstate, String question, String queryType) {
+    public Query createRealEstateQuery(User user, RealEstate realEstate, String question) {
         Query query = new Query();
         query.setUser(user);
         query.setRealEstate(realEstate);
         query.setQuestion(question);
-        query.setQueryType(queryType);
-        query.setStatus("PENDING");
+        query.setQueryType(QueryType.REAL_ESTATE_QUERY);
+        query.setStatus(QueryStatus.UNANSWERED);
         query.setQueryDate(LocalDate.now());
 
         return queryRepository.save(query);
     }
 
-    public Query createSupportQuery(User user, String question, String queryType) {
+    public Query createSupportQuery(User user, String question) {
         Query query = new Query();
         query.setUser(user);
         query.setRealEstate(null);
         query.setQuestion(question);
-        query.setQueryType(queryType);
-        query.setStatus("PENDING");
+        query.setQueryType(QueryType.SUPPORT_REQUEST);
+        query.setStatus(QueryStatus.UNANSWERED);
         query.setQueryDate(LocalDate.now());
 
         return queryRepository.save(query);
@@ -118,7 +116,7 @@ public class QueryService {
         return queryRepository.findByUser(user);
     }
 
-    public Query updateQuery(Long queryId, String newStatus, String response) {
+    public Query updateQuery(Long queryId, QueryStatus newStatus, String response) {
         Query query = queryRepository.findById(queryId)
                 .orElseThrow(() -> new RuntimeException("Query not found"));
 

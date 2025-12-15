@@ -19,8 +19,9 @@ public class Review {
     private String comment;
     @JsonView(ReviewViews.SupportReviewSummary.class)
     private LocalDate date;
+    @Enumerated(EnumType.STRING)
     @JsonView(ReviewViews.SupportReviewSummary.class)
-    private String status;
+    private ReviewStatus status;
 
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false)
@@ -35,7 +36,14 @@ public class Review {
     public Review() {
     }
 
-    public Review(Integer rating, String comment, LocalDate date, String status, User user, RealEstate realEstate) {
+    public Review(
+            Integer rating,
+            String comment,
+            LocalDate date,
+            ReviewStatus status,
+            User user,
+            RealEstate realEstate
+    ) {
         this.rating = rating;
         this.comment = comment;
         this.date = date;
@@ -76,11 +84,11 @@ public class Review {
         this.date = date;
     }
 
-    public String getStatus() {
+    public ReviewStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(ReviewStatus status) {
         this.status = status;
     }
 
@@ -98,19 +106,5 @@ public class Review {
 
     public void setRealEstate(RealEstate realEstate) {
         this.realEstate = realEstate;
-    }
-
-
-    @Override
-    public String toString() {
-        return "Review{" +
-                "id=" + id +
-                ", rating=" + rating +
-                ", comment='" + comment + '\'' +
-                ", date=" + date +
-                ", status='" + status + '\'' +
-                ", user=" + user +
-                ", realEstate=" + realEstate +
-                '}';
     }
 }

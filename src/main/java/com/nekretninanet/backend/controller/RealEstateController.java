@@ -1,6 +1,12 @@
 package com.nekretninanet.backend.controller;
 
+import com.nekretninanet.backend.dto.RealEstateCreateDTO;
+import com.nekretninanet.backend.dto.RealEstateDTO;
+import com.nekretninanet.backend.dto.RealEstateStatusDTO;
+import com.nekretninanet.backend.dto.RealEstateUpdateDTO;
 import com.nekretninanet.backend.model.RealEstate;
+import com.nekretninanet.backend.model.RealEstateStatus;
+import com.nekretninanet.backend.model.User;
 import com.nekretninanet.backend.service.RealEstateService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +20,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/real-estates")
@@ -27,114 +35,204 @@ public class RealEstateController {
     }
 
     @GetMapping
-public ResponseEntity<List<RealEstate>> getRealEstates(
-        @RequestParam(required = false) Double minPrice,
-        @RequestParam(required = false) Double maxPrice,
-        @RequestParam(required = false) String location,
-        @RequestParam(required = false) Integer yearBuilt
-) {
-    try {
-        List<RealEstate> result;
+    public ResponseEntity<List<RealEstateDTO>> getRealEstates(
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) Integer yearBuilt
+    ) {
+        try {
+            List<RealEstate> result;
 
-        // Ako nema filter parametara → vrati sve aktivne
-        if (minPrice == null && maxPrice == null && location == null && yearBuilt == null) {
-            result = service.getActiveRealEstates();
-        } 
-        // Ako ima filter parametara → filtriraj
-        else {
-            result = service.filterRealEstates(minPrice, maxPrice, location, yearBuilt);
+            if (minPrice == null && maxPrice == null && location == null && yearBuilt == null) {
+                result = service.getActiveRealEstates();
+            } else {
+                result = service.filterRealEstates(minPrice, maxPrice, location, yearBuilt);
+            }
+
+            if (result.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+
+            List<RealEstateDTO> dtoList = result.stream()
+                    .map(r -> new RealEstateDTO(
+                            r.getId(),
+                            r.getTitle(),
+                            r.getPrice(),
+                            r.getLocation(),
+                            r.getYearBuilt()))
+                    .toList();
+
+            return ResponseEntity.ok(dtoList);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
 
-        if (result.isEmpty()) {
+    @GetMapping("/{title}")
+    public ResponseEntity<List<RealEstateDTO>> getRealEstatesByTitle(@PathVariable String title) {
+        try {
+            List<RealEstate> estates = service.getRealEstatesByTitle(title);
+
+            if (estates.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+
+            List<RealEstateDTO> dtoList = estates.stream()
+                    .map(e -> new RealEstateDTO(
+                            e.getId(),
+                            e.getTitle(),
+                            e.getPrice(),
+                            e.getLocation(),
+                            e.getYearBuilt()))
+                    .toList();
+
+            return ResponseEntity.ok(dtoList);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<RealEstateStatusDTO>> getRealEstatesByUserId(@PathVariable Long userId) {
+        try {
+            List<RealEstate> estates = service.getByUserId(userId);
+
+            if (estates.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            }
+
+            List<RealEstateStatusDTO> dtoList = estates.stream()
+                    .map(e -> new RealEstateStatusDTO(
+                            e.getId(),
+                            e.getTitle(),
+                            e.getPrice(),
+                            e.getLocation(),
+                            e.getYearBuilt(),
+                            e.getStatus().name() // enum -> string
+                    ))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(dtoList);
+
+        } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-
-        return ResponseEntity.ok(result);
-
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
-}
 
-@GetMapping("/{title}")
-public ResponseEntity<List<RealEstate>> getRealEstatesByTitle(@PathVariable String title) {
-    try {
-        List<RealEstate> estates = service.getRealEstatesByTitle(title);
+    @GetMapping("/user/username/{username}")
+    public ResponseEntity<List<RealEstateStatusDTO>> getRealEstatesByUsername(@PathVariable String username) {
+        try {
+            List<RealEstate> estates = service.getByUsername(username);
 
-        if (estates.isEmpty()) {
+            if (estates.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            }
+
+            List<RealEstateStatusDTO> dtoList = estates.stream()
+                    .map(e -> new RealEstateStatusDTO(
+                            e.getId(),
+                            e.getTitle(),
+                            e.getPrice(),
+                            e.getLocation(),
+                            e.getYearBuilt(),
+                            e.getStatus().name()
+                    ))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(dtoList);
+
+        } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-
-        return ResponseEntity.ok(estates);
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
-}
 
-@GetMapping("/user/{username}")
-public ResponseEntity<?> getRealEstatesByUsername(@PathVariable String username) {
-    try {
-        List<RealEstate> estates = service.getByUsername(username);
+    @PostMapping
+    public ResponseEntity<RealEstateStatusDTO> createRealEstate(@RequestBody RealEstateCreateDTO dto) {
+        try {
+            RealEstate realEstate = new RealEstate();
+            realEstate.setTitle(dto.getTitle());
+            realEstate.setPrice(dto.getPrice());
+            realEstate.setLocation(dto.getLocation());
+            realEstate.setArea(dto.getArea());
+            realEstate.setYearBuilt(dto.getYearBuilt());
+            realEstate.setDescription(dto.getDescription());
+            realEstate.setPublishDate(LocalDate.now());
+            realEstate.setStatus(RealEstateStatus.ACTIVE); // enum
 
-        if (estates.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            if (dto.getUserId() != null) {
+                User user = service.getUserById(dto.getUserId());
+                realEstate.setUser(user);
+            }
+
+            RealEstate created = service.createRealEstate(realEstate);
+
+            RealEstateStatusDTO responseDTO = new RealEstateStatusDTO(
+                    created.getId(),
+                    created.getTitle(),
+                    created.getPrice(),
+                    created.getLocation(),
+                    created.getYearBuilt(),
+                    created.getStatus().name()
+            );
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-
-        return ResponseEntity.ok(estates); // 200 OK
     }
-    catch (RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); // 404 Not Found
-    }
-}
 
-@PostMapping
-public ResponseEntity<?> createRealEstate(@RequestBody RealEstate realEstate) {
-    try {
-        if (realEstate == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Request body is missing or invalid");
+    @PatchMapping("/{id}")
+    public ResponseEntity<RealEstateStatusDTO> updateRealEstatePartially(
+            @PathVariable Long id,
+            @RequestBody RealEstateUpdateDTO updates
+    ) {
+        try {
+            RealEstate existing = service.getRealEstateById(id);
+
+            if (updates.getTitle() != null) existing.setTitle(updates.getTitle());
+            if (updates.getPrice() != null) existing.setPrice(updates.getPrice());
+            if (updates.getLocation() != null) existing.setLocation(updates.getLocation());
+            if (updates.getArea() != null) existing.setArea(updates.getArea());
+            if (updates.getYearBuilt() != null) existing.setYearBuilt(updates.getYearBuilt());
+            if (updates.getDescription() != null) existing.setDescription(updates.getDescription());
+
+            RealEstate updated = service.updateRealEstatePartial(existing);
+
+            RealEstateStatusDTO responseDTO = new RealEstateStatusDTO(
+                    updated.getId(),
+                    updated.getTitle(),
+                    updated.getPrice(),
+                    updated.getLocation(),
+                    updated.getYearBuilt(),
+                    updated.getStatus().name()
+            );
+
+            return ResponseEntity.ok(responseDTO);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-
-        RealEstate created = service.createRealEstate(realEstate);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(created); // 201 CREATED
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("An error occurred while creating real estate.");
     }
-}
 
-@PatchMapping("/{id}")
-public ResponseEntity<?> updateRealEstatePartially(
-        @PathVariable Long id,
-        @RequestBody RealEstate updates
-) {
-    try {
-        RealEstate updated = service.updateRealEstatePartial(id, updates);
-
-        return ResponseEntity.ok(updated); // 200 OK
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteRealEstate(@PathVariable Long id) {
+        try {
+            service.deleteRealEstateCascading(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while deleting the real estate");
+        }
     }
-    catch (RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); // 404
-    }
-    catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error updating real estate");
-    }
-}
-
-@DeleteMapping("/{id}")
-public ResponseEntity<?> deleteRealEstate(@PathVariable Long id) {
-    try {
-        service.deleteRealEstate(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
-    } catch (RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); // 404 Not Found
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("An error occurred while deleting the real estate"); // 500 Internal Server Error
-    }
-}
 
 
 
