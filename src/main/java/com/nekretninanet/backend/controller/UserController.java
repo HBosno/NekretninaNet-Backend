@@ -51,7 +51,7 @@ public class UserController {
 
     @DeleteMapping("/admin/support-accounts/{id}")
     public ResponseEntity<Void> deleteSupportAccount(@PathVariable Long id) {
-        userService.deleteSupportUser(id);
+        userService.deleteSupportUserCascading(id);
         return ResponseEntity.ok().build();
     }
 
@@ -73,7 +73,7 @@ public class UserController {
 
     @DeleteMapping("/support/regular-users-accounts/{id}")
     public ResponseEntity<Void> deleteRegularUserBySupport(@PathVariable Long id) {
-        userService.deleteRegularUser(id);
+        userService.deleteRegularUserCascading(id);
         return ResponseEntity.ok().build();
     }
 
@@ -100,7 +100,7 @@ public class UserController {
     // analogno kao za prethodni endpoint. vec postoji identicna logika za delete /support/regular-users-accounts/{username}
     @DeleteMapping("/user/account/{id}")
     public ResponseEntity<Void> deleteRegularUserByRegular(@PathVariable Long id) {
-        userService.deleteRegularUser(id);
+        userService.deleteRegularUserCascading(id);
         return ResponseEntity.ok().build();
     }
 }

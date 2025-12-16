@@ -45,8 +45,9 @@ public class ReviewService {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Review with ID " + id + " not found."));
 
-        review.setStatus(ReviewStatus.REMOVED);
-        reviewRepository.save(review);
+ //       review.setStatus(ReviewStatus.REMOVED);  ipak cemo HARD delete, za soft treba azurirat i sva kaskadna brisanja..
+ //       reviewRepository.save(review);           ovako manje sanse za greske
+        reviewRepository.delete(review);
     }
 
     public Optional<Review> getReviewById(Long id) {

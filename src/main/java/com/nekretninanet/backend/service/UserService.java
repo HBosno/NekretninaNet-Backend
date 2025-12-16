@@ -11,6 +11,7 @@ import com.nekretninanet.backend.repository.QueryRepository;
 import com.nekretninanet.backend.repository.RealEstateRepository;
 import com.nekretninanet.backend.repository.ReviewRepository;
 import com.nekretninanet.backend.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -191,44 +192,89 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public void deleteSupportUser(Long id) {
+    @Transactional
+    public void deleteSupportUserCascading(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Support user not found"));
 
         if (user.getUserType() != UserType.SUPPORT) {
-            throw new IllegalArgumentException("User is not a support account");
+            throw new BadRequestException("User is not a support account");
         }
 
-        List<Review> reviews = reviewRepository.findByUser(user);
-        reviewRepository.deleteAll(reviews);
+        // Query gdje je user autor
+        List<Query> userQueries = queryRepository.findByUser(user);
+        queryRepository.deleteAll(userQueries);
 
-        List<Query> queries = queryRepository.findByUser(user);
-        queryRepository.deleteAll(queries);
-
+        // Nekretnine usera
         List<RealEstate> estates = realEstateRepository.findByUser(user);
+
+        if (!estates.isEmpty()) {
+            // ID-jevi nekretnina
+            List<Long> estateIds = estates.stream()
+                    .map(RealEstate::getId)
+                    .toList();
+
+            // Query po nekretninama
+            List<Query> estateQueries =
+                    queryRepository.findByRealEstateIdIn(estateIds);
+            queryRepository.deleteAll(estateQueries);
+
+            // Review po nekretninama
+            List<Review> estateReviews =
+                    reviewRepository.findByRealEstateIdIn(estateIds);
+            reviewRepository.deleteAll(estateReviews);
+        }
+
+        // Review gdje je user autor
+        List<Review> userReviews = reviewRepository.findByUser(user);
+        reviewRepository.deleteAll(userReviews);
+
+        // Briši nekretnine
         realEstateRepository.deleteAll(estates);
 
+        // Briši usera
         userRepository.delete(user);
     }
 
 
-    public void deleteRegularUser(Long id) {
+    @Transactional
+    public void deleteRegularUserCascading(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Regular user not found"));
 
         if (user.getUserType() != UserType.USER) {
-            throw new IllegalArgumentException("User is not a regular account");
+            throw new BadRequestException("User is not a regular account");
         }
 
-        List<Review> reviews = reviewRepository.findByUser(user);
-        reviewRepository.deleteAll(reviews);
+        // Query gdje je user autor
+        List<Query> userQueries = queryRepository.findByUser(user);
+        queryRepository.deleteAll(userQueries);
 
-        List<Query> queries = queryRepository.findByUser(user);
-        queryRepository.deleteAll(queries);
-
+        // Nekretnine usera
         List<RealEstate> estates = realEstateRepository.findByUser(user);
+
+        if (!estates.isEmpty()) {
+            List<Long> estateIds = estates.stream()
+                    .map(RealEstate::getId)
+                    .toList();
+
+            // Query po nekretninama
+            List<Query> estateQueries = queryRepository.findByRealEstateIdIn(estateIds);
+            queryRepository.deleteAll(estateQueries);
+
+            // Review po nekretninama
+            List<Review> estateReviews = reviewRepository.findByRealEstateIdIn(estateIds);
+            reviewRepository.deleteAll(estateReviews);
+        }
+
+        // Review gdje je user autor
+        List<Review> userReviews = reviewRepository.findByUser(user);
+        reviewRepository.deleteAll(userReviews);
+
+        // Briši nekretnine
         realEstateRepository.deleteAll(estates);
 
+        // Briši usera
         userRepository.delete(user);
     }
 
