@@ -3,6 +3,7 @@ package com.nekretninanet.backend.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nekretninanet.backend.dto.QueryResponseDTO;
 import com.nekretninanet.backend.dto.SupportRequestDTO;
+import com.nekretninanet.backend.dto.QueryResponseLongDTO;
 import com.nekretninanet.backend.dto.SupportRequestResponseDto;
 import com.nekretninanet.backend.model.*;
 import com.nekretninanet.backend.repository.QueryRepository;
@@ -24,7 +25,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-
+import java.util.stream.Collectors;
+import java.util.Collections;
 @RestController
 @RequestMapping("/")
 public class QueryController {
@@ -64,154 +66,175 @@ public class QueryController {
 
     /* ===================== USER ===================== */
 
-    @PostMapping("/user/real-estate-query/{realEstateId}/{userId}")
-    public ResponseEntity<?> createRealEstateQuery(
-            @PathVariable Long realEstateId,
-            @PathVariable Long userId,
-            @RequestBody Query queryBody
-    ) {
-        try {
-            if (queryBody.getQuestion() == null || queryBody.getQuestion().isBlank()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Question cannot be empty");
-            }
-
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            RealEstate realEstate = realEstateRepository.findById(realEstateId)
-                    .orElseThrow(() -> new RuntimeException("RealEstate not found"));
-
-            Query newQuery = new Query();
-            newQuery.setUser(user);
-            newQuery.setRealEstate(realEstate);
-            newQuery.setQuestion(queryBody.getQuestion());
-            newQuery.setQueryDate(LocalDate.now());
-            newQuery.setResponse(""); // prazno
-            newQuery.setQueryType(QueryType.REAL_ESTATE_QUERY);
-            newQuery.setStatus(QueryStatus.UNANSWERED);
-
-            Query createdQuery = queryRepository.save(newQuery);
-
-            QueryResponseDTO responseDTO = new QueryResponseDTO(
-                    createdQuery.getId(),
-                    createdQuery.getQuestion(),
-                    createdQuery.getQueryDate(),
-                    createdQuery.getResponse(),
-                    createdQuery.getQueryType().name(),
-                    createdQuery.getStatus().name(),
-                    createdQuery.getUser().getUsername()
-            );
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
-
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error creating query");
+   @PostMapping("/user/real-estate-query/{realEstateId}/{userId}")
+public ResponseEntity<?> createRealEstateQuery(
+        @PathVariable Long realEstateId,
+        @PathVariable Long userId,
+        @RequestBody String question
+) {
+    try {
+        if (question == null || question.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Question cannot be empty");
         }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        RealEstate realEstate = realEstateRepository.findById(realEstateId)
+                .orElseThrow(() -> new RuntimeException("RealEstate not found"));
+
+        Query newQuery = new Query();
+        newQuery.setUser(user);
+        newQuery.setRealEstate(realEstate);
+        newQuery.setQuestion(question);
+        newQuery.setQueryDate(LocalDate.now());
+        newQuery.setResponse(""); // default
+        newQuery.setQueryType(QueryType.REAL_ESTATE_QUERY);
+        newQuery.setStatus(QueryStatus.UNANSWERED);
+
+        Query createdQuery = queryRepository.save(newQuery);
+
+        QueryResponseDTO responseDTO = new QueryResponseDTO(
+                createdQuery.getId(),
+                createdQuery.getQuestion(),
+                createdQuery.getQueryDate(),
+                createdQuery.getResponse(),
+                createdQuery.getQueryType().name(),
+                createdQuery.getStatus().name(),
+                createdQuery.getUser().getUsername()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error creating query");
     }
+}
+
 
     @GetMapping("/user/real-estate-queries/{username}")
-    public ResponseEntity<?> getQueriesForUser(@PathVariable String username) {
-        try {
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+public ResponseEntity<List<QueryResponseLongDTO>> getQueriesForUser(@PathVariable String username) {
+    try {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-            List<Query> queries = queryService.getQueriesForUserRealEstates(user);
+        List<Query> queries = queryService.getQueriesForUserRealEstates(user);
 
-            if (queries.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-            }
-
-            return ResponseEntity.ok(queries);
-
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving queries");
+        if (queries.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
+
+List<QueryResponseLongDTO> dtoList = queries.stream()
+        .map(q -> new QueryResponseLongDTO(
+                q.getId(),                // Long id
+                q.getQueryDate(),         // LocalDate queryDate
+                q.getQuestion(),          // String question
+                q.getResponse(),          // String response
+                q.getQueryType().name(),  // String queryType
+                q.getStatus().name(),     // String status
+                q.getUser().getId(),      // Long userId
+                q.getUser().getUsername() // String username
+        ))
+        .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtoList);
+
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
     }
+}
 
-    @PatchMapping("/user/real-estate-queries/{id}")
-    public ResponseEntity<?> updateQuery(@PathVariable Long id,
-                                         @RequestBody Map<String, String> body) {
-        try {
-            Query query = queryService.getQueryById(id);
 
-            String question = body.get("question");
-            if (question != null && !question.isBlank()) {
-                query.setQuestion(question);
-            }
+  @PatchMapping("/user/real-estate-queries/{id}")
+public ResponseEntity<?> updateQuery(
+        @PathVariable Long id,
+        @RequestBody String response // direktno očekujemo String u body-u
+) {
+    try {
+        Query query = queryService.getQueryById(id);
 
-            query.setQueryDate(LocalDate.now());
-            if (query.getResponse() == null) query.setResponse("");
-            query.setQueryType(QueryType.REAL_ESTATE_QUERY);
-            query.setStatus(QueryStatus.UNANSWERED);
-
-            Query updatedQuery = queryService.saveQuery(query);
-
-            QueryResponseDTO responseDTO = new QueryResponseDTO(
-                    updatedQuery.getId(),
-                    updatedQuery.getQuestion(),
-                    updatedQuery.getQueryDate(),
-                    updatedQuery.getResponse(),
-                    updatedQuery.getQueryType().name(),
-                    updatedQuery.getStatus().name(),
-                    updatedQuery.getUser().getUsername()
-            );
-
-            return ResponseEntity.ok(responseDTO);
-
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error updating query");
+        // Ako je response poslan i nije prazan, ažuriraj ga i postavi status na ANSWERED
+        if (response != null && !response.isBlank()) {
+            query.setResponse(response);
+            query.setStatus(QueryStatus.ANSWERED);
         }
+
+        // Ostale stvari uvijek ažuriramo
+        query.setQueryDate(LocalDate.now());
+        query.setQueryType(QueryType.REAL_ESTATE_QUERY);
+
+        Query updatedQuery = queryService.saveQuery(query);
+
+        QueryResponseDTO responseDTO = new QueryResponseDTO(
+                updatedQuery.getId(),
+                updatedQuery.getQuestion(),
+                updatedQuery.getQueryDate(),
+                updatedQuery.getResponse(),
+                updatedQuery.getQueryType().name(),
+                updatedQuery.getStatus().name(),
+                updatedQuery.getUser().getUsername()
+        );
+
+        return ResponseEntity.ok(responseDTO);
+
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error updating query");
     }
+}
+
 
     @PostMapping("/user/support-request/{userId}")
-    public ResponseEntity<?> createSupportRequest(@PathVariable Long userId,
-                                                  @RequestBody Map<String, String> body) {
-        try {
-            String question = body.get("question");
-            if (question == null || question.isBlank()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Question is required");
-            }
-
-            User user = queryService.getUserById(userId);
-
-            Query query = new Query();
-            query.setUser(user);
-            query.setQuestion(question);
-            query.setQueryDate(LocalDate.now());
-            query.setResponse(null);
-            query.setQueryType(QueryType.SUPPORT_REQUEST);
-            query.setStatus(QueryStatus.UNANSWERED);
-            query.setRealEstate(null);
-
-            Query savedQuery = queryRepository.save(query);
-
-            SupportRequestDTO responseDTO = new SupportRequestDTO(
-                    savedQuery.getId(),
-                    savedQuery.getQuestion(),
-                    savedQuery.getQueryDate(),
-                    savedQuery.getResponse(),
-                    savedQuery.getQueryType().name(),
-                    savedQuery.getStatus().name(),
-                    savedQuery.getUser().getUsername()
-            );
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
-
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error creating support request");
+public ResponseEntity<?> createSupportRequest(
+        @PathVariable Long userId,
+        @RequestBody String question
+) {
+    try {
+        if (question == null || question.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Question is required");
         }
+
+        User user = queryService.getUserById(userId);
+
+        Query query = new Query();
+        query.setUser(user);
+        query.setQuestion(question);
+        query.setQueryDate(LocalDate.now());
+        query.setResponse(null); // default
+        query.setQueryType(QueryType.SUPPORT_REQUEST);
+        query.setStatus(QueryStatus.UNANSWERED);
+        query.setRealEstate(null); // support request nije vezan za nekretninu
+
+        Query savedQuery = queryRepository.save(query);
+
+        SupportRequestDTO responseDTO = new SupportRequestDTO(
+                savedQuery.getId(),
+                savedQuery.getQuestion(),
+                savedQuery.getQueryDate(),
+                savedQuery.getResponse(),
+                savedQuery.getQueryType().name(),
+                savedQuery.getStatus().name(),
+                savedQuery.getUser().getUsername()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error creating support request");
     }
+}
+
 
 }

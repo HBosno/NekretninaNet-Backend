@@ -7,6 +7,7 @@ public class RealEstateUpdateDTO {
     private Double area;
     private Integer yearBuilt;
     private String description;
+    private String status;
 
     public RealEstateUpdateDTO() {}
 
@@ -28,4 +29,7 @@ public class RealEstateUpdateDTO {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

@@ -4,6 +4,7 @@ import com.nekretninanet.backend.dto.RealEstateCreateDTO;
 import com.nekretninanet.backend.dto.RealEstateDTO;
 import com.nekretninanet.backend.dto.RealEstateStatusDTO;
 import com.nekretninanet.backend.dto.RealEstateUpdateDTO;
+import com.nekretninanet.backend.dto.RealEstateFullDTO;
 import com.nekretninanet.backend.model.RealEstate;
 import com.nekretninanet.backend.model.RealEstateStatus;
 import com.nekretninanet.backend.model.User;
@@ -113,31 +114,37 @@ public class RealEstateController {
     }
 
     @GetMapping("/user/username/{username}")
-    public ResponseEntity<List<RealEstateStatusDTO>> getRealEstatesByUsername(@PathVariable String username) {
-        try {
-            List<RealEstate> estates = service.getByUsername(username);
+public ResponseEntity<List<RealEstateFullDTO>> getRealEstatesByUsername(
+        @PathVariable String username
+) {
+    try {
+        List<RealEstate> estates = service.getByUsername(username);
 
-            if (estates.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-            }
-
-            List<RealEstateStatusDTO> dtoList = estates.stream()
-                    .map(e -> new RealEstateStatusDTO(
-                            e.getId(),
-                            e.getTitle(),
-                            e.getPrice(),
-                            e.getLocation(),
-                            e.getYearBuilt(),
-                            e.getStatus().name()
-                    ))
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.ok(dtoList);
-
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        if (estates.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
+
+        List<RealEstateFullDTO> dtoList = estates.stream()
+                .map(e -> new RealEstateFullDTO(
+                        e.getId(),
+                        e.getTitle(),
+                        e.getPrice(),
+                        e.getLocation(),
+                        e.getArea(),
+                        e.getYearBuilt(),
+                        e.getDescription(),
+                        e.getPublishDate(),
+                        e.getStatus().name()
+                ))
+                .toList();
+
+        return ResponseEntity.ok(dtoList);
+
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
+}
+
 
     @PostMapping
     public ResponseEntity<RealEstateStatusDTO> createRealEstate(@RequestBody RealEstateCreateDTO dto) {
@@ -177,40 +184,65 @@ public class RealEstateController {
         }
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<RealEstateStatusDTO> updateRealEstatePartially(
-            @PathVariable Long id,
-            @RequestBody RealEstateUpdateDTO updates
-    ) {
-        try {
-            RealEstate existing = service.getRealEstateById(id);
+   @PatchMapping("/{id}")
+public ResponseEntity<RealEstateStatusDTO> updateRealEstatePartially(
+        @PathVariable Long id,
+        @RequestBody RealEstateUpdateDTO updates
+) {
+    try {
+        RealEstate existing = service.getRealEstateById(id);
 
-            if (updates.getTitle() != null) existing.setTitle(updates.getTitle());
-            if (updates.getPrice() != null) existing.setPrice(updates.getPrice());
-            if (updates.getLocation() != null) existing.setLocation(updates.getLocation());
-            if (updates.getArea() != null) existing.setArea(updates.getArea());
-            if (updates.getYearBuilt() != null) existing.setYearBuilt(updates.getYearBuilt());
-            if (updates.getDescription() != null) existing.setDescription(updates.getDescription());
+        if (updates.getTitle() != null)
+            existing.setTitle(updates.getTitle());
 
-            RealEstate updated = service.updateRealEstatePartial(existing);
+        if (updates.getPrice() != null)
+            existing.setPrice(updates.getPrice());
 
-            RealEstateStatusDTO responseDTO = new RealEstateStatusDTO(
-                    updated.getId(),
-                    updated.getTitle(),
-                    updated.getPrice(),
-                    updated.getLocation(),
-                    updated.getYearBuilt(),
-                    updated.getStatus().name()
-            );
+        if (updates.getLocation() != null)
+            existing.setLocation(updates.getLocation());
 
-            return ResponseEntity.ok(responseDTO);
+        if (updates.getArea() != null)
+            existing.setArea(updates.getArea());
 
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        if (updates.getYearBuilt() != null)
+            existing.setYearBuilt(updates.getYearBuilt());
+
+        if (updates.getDescription() != null)
+            existing.setDescription(updates.getDescription());
+
+        // ✅ STATUS UPDATE (STRING → ENUM)
+        if (updates.getStatus() != null) {
+            try {
+                existing.setStatus(
+                        RealEstateStatus.valueOf(updates.getStatus().toUpperCase())
+                );
+            } catch (IllegalArgumentException ex) {
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(null);
+            }
         }
+
+        RealEstate updated = service.updateRealEstatePartial(existing);
+
+        RealEstateStatusDTO responseDTO = new RealEstateStatusDTO(
+                updated.getId(),
+                updated.getTitle(),
+                updated.getPrice(),
+                updated.getLocation(),
+                updated.getYearBuilt(),
+                updated.getStatus().name()
+        );
+
+        return ResponseEntity.ok(responseDTO);
+
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
+}
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteRealEstate(@PathVariable Long id) {
