@@ -4,6 +4,15 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 public class CreateSupportUserRequest {
+    public CreateSupportUserRequest(String firstName, String lastName, String username, String password, String address, String email, String phoneNumber) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+        this.password = password;
+        this.address = address;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+    }
 
     @NotBlank
     private String firstName;
@@ -15,7 +24,7 @@ public class CreateSupportUserRequest {
     private String username;
 
     @NotBlank
-    private String hashPassword;
+    private String password;
 
     private String address;
 
@@ -36,8 +45,8 @@ public class CreateSupportUserRequest {
         return username;
     }
 
-    public String getHashPassword() {
-        return hashPassword;
+    public String getPassword() {
+        return password;
     }
 
     public String getAddress() {

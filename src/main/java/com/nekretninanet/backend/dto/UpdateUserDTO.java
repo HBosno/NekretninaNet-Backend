@@ -4,10 +4,20 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 public class UpdateUserDTO {
+    public UpdateUserDTO(String firstName, String lastName, String username, String password, String address, String email, String phoneNumber) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+        this.password = password;
+        this.address = address;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+    }
 
     private String firstName;
     private String lastName;
-    private String hashPassword;
+    private String username;
+    private String password;
     private String address;
 
     @Email
@@ -20,9 +30,11 @@ public class UpdateUserDTO {
 
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
-    public String getHashPassword() { return hashPassword; }
-    public void setHashPassword(String hashPassword) { this.hashPassword = hashPassword; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }

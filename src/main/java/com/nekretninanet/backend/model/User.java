@@ -1,6 +1,10 @@
 package com.nekretninanet.backend.model;
 
+import com.nekretninanet.backend.view.QueryViews;
+import com.nekretninanet.backend.view.ReviewViews;
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.nekretninanet.backend.view.UserViews;
 
 @Entity
 @Table(name = "users")
@@ -8,25 +12,31 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonView({UserViews.RegularUserSummary.class, UserViews.SupportAccountSummary.class})
     private Long id;
 
     @Column(name = "first_name")
+    @JsonView({UserViews.RegularUserSummary.class, UserViews.SupportAccountSummary.class})
     private String firstName;
 
     @Column(name = "last_name")
+    @JsonView({UserViews.RegularUserSummary.class, UserViews.SupportAccountSummary.class})
     private String lastName;
 
     @Column(unique = true)
+    @JsonView({UserViews.RegularUserSummary.class, QueryViews.SupportRequestSummary.class, ReviewViews.SupportReviewSummary.class})
     private String username;
 
     @Column(name = "hash_password")
     private String hashPassword;
 
+    @JsonView(UserViews.RegularUserSummary.class)
     private String address;
-
+    @JsonView({UserViews.RegularUserSummary.class, UserViews.SupportAccountSummary.class})
     private String email;
 
     @Column(name = "phone_number")
+    @JsonView(UserViews.RegularUserSummary.class)
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
