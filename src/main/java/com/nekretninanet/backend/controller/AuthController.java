@@ -7,6 +7,7 @@ import com.nekretninanet.backend.model.User;
 import com.nekretninanet.backend.security.CustomUserDetailsService;
 import com.nekretninanet.backend.security.JwtUtil;
 import com.nekretninanet.backend.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,14 +32,14 @@ public class AuthController {
 
 
     @PostMapping("/auth/register")
-    public ResponseEntity<Void> register(@RequestBody RegisterRequestDto dto) {
+    public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequestDto dto) {
         userService.register(dto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
 
     @PostMapping("/auth/login")
-    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto dto) {
+    public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto dto) {
 
         User user = userService.login(dto);
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());

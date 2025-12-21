@@ -66,7 +66,7 @@ public class UserController {
     @JsonView(UserViews.RegularUserSummary.class)
     public ResponseEntity<User> updateRegularUserBySupport(
             @PathVariable Long id,
-            @RequestBody UpdateUserDTO dto) {
+            @Valid @RequestBody UpdateUserDTO dto) {
         User updatedUser = userService.updateRegularUser(id, dto);
         return ResponseEntity.ok(updatedUser);
     }
@@ -92,7 +92,7 @@ public class UserController {
     @PatchMapping("/user/account/{id}")
     public ResponseEntity<User> updateRegularUserByRegular(
             @PathVariable Long id,
-            @RequestBody UpdateUserDTO dto) {
+            @Valid @RequestBody UpdateUserDTO dto) {
         userService.updateRegularUser(id, dto);
         return ResponseEntity.noContent().build();
     }

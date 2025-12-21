@@ -78,6 +78,16 @@ public ResponseEntity<?> createRealEstateQuery(
                     .body("Question cannot be empty");
         }
 
+        if (question.length() > 500) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Question cannot exceed 500 characters");
+        }
+
+        if (!question.matches("^[A-Za-z0-9 .,!?\\-()]*$")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Question contains invalid characters");
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -161,6 +171,15 @@ public ResponseEntity<?> updateQuery(
 
         // Ako je response poslan i nije prazan, ažuriraj ga i postavi status na ANSWERED
         if (response != null && !response.isBlank()) {
+            if (response.length() > 500) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Response cannot exceed 500 characters");
+            }
+            if (!response.matches("^[A-Za-z0-9 .,!?\\-()]*$")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Response contains invalid characters");
+            }
+
             query.setResponse(response);
             query.setStatus(QueryStatus.ANSWERED);
         }
@@ -201,6 +220,16 @@ public ResponseEntity<?> createSupportRequest(
         if (question == null || question.isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Question is required");
+        }
+
+        if (question.length() > 500) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Question cannot exceed 500 characters");
+        }
+
+        if (!question.matches("^[A-Za-z0-9 .,!?\\-()]*$")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Question contains invalid characters");
         }
 
         User user = queryService.getUserById(userId);

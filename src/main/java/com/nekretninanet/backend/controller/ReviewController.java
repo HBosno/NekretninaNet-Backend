@@ -11,6 +11,7 @@ import com.nekretninanet.backend.model.RealEstate;
 import com.nekretninanet.backend.model.User;
 import com.nekretninanet.backend.repository.RealEstateRepository;
 import com.nekretninanet.backend.repository.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -58,13 +59,9 @@ public class ReviewController {
     public ResponseEntity<?> createReview(
             @PathVariable Long userId,
             @PathVariable Long realEstateId,
-            @RequestBody ReviewRequestDTO body
+            @Valid @RequestBody ReviewRequestDTO body
     ) {
         try {
-            if (body.getRating() == null || body.getComment() == null || body.getComment().isBlank()) {
-                return ResponseEntity.badRequest().body("Rating and comment are required");
-            }
-
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -102,7 +99,7 @@ public class ReviewController {
     @PatchMapping("/user/review/{id}")
     public ResponseEntity<?> updateReview(
             @PathVariable Long id,
-            @RequestBody ReviewRequestDTO body
+            @Valid @RequestBody ReviewRequestDTO body
     ) {
         try {
             Review review = reviewService.getReviewById(id)
