@@ -78,11 +78,33 @@ public ResponseEntity<?> createRealEstateQuery(
                     .body("Question cannot be empty");
         }
 
+        if (question.length() > 500) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Question cannot exceed 500 characters");
+        }
+
+        if (!question.matches("^[A-Za-z0-9 .,!?\\-()čćžšđČĆŽŠĐ]*$")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Question contains invalid characters");
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         RealEstate realEstate = realEstateRepository.findById(realEstateId)
                 .orElseThrow(() -> new RuntimeException("RealEstate not found"));
+
+        if (realEstate.getUser().getId().equals(user.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("You cannot send a query to your own property");
+        }
+
+        if (realEstate.getStatus() == RealEstateStatus.INACTIVE) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Cannot send a query for an inactive property");
+        }
+
+        question = question.replace("\"", "").trim();
 
         Query newQuery = new Query();
         newQuery.setUser(user);
@@ -116,13 +138,13 @@ public ResponseEntity<?> createRealEstateQuery(
 }
 
 
-    @GetMapping("/user/real-estate-queries/{username}")
-public ResponseEntity<List<QueryResponseLongDTO>> getQueriesForUser(@PathVariable String username) {
+    @GetMapping("/user/real-estate-queries/{realEstateId}")
+public ResponseEntity<List<QueryResponseLongDTO>> getQueriesForUser(@PathVariable Long realEstateId) {
     try {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        RealEstate realEstate = realEstateRepository.findById(realEstateId)
+                .orElseThrow(() -> new RuntimeException("Real estate not found"));
 
-        List<Query> queries = queryService.getQueriesForUserRealEstates(user);
+        List<Query> queries = queryRepository.findByRealEstateAndStatusNot(realEstate, QueryStatus.REMOVED);
 
         if (queries.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -159,8 +181,23 @@ public ResponseEntity<?> updateQuery(
     try {
         Query query = queryService.getQueryById(id);
 
+        // Provjera tipa upita
+        if (query.getQueryType() == QueryType.SUPPORT_REQUEST) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Cannot update a support request with this endpoint");
+        }
+
         // Ako je response poslan i nije prazan, ažuriraj ga i postavi status na ANSWERED
         if (response != null && !response.isBlank()) {
+            if (response.length() > 500) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Response cannot exceed 500 characters");
+            }
+            if (!response.matches("^[A-Za-z0-9 .,!?\\-()čćžšđČĆŽŠĐ]*$")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Response contains invalid characters");
+            }
+
             query.setResponse(response);
             query.setStatus(QueryStatus.ANSWERED);
         }
@@ -201,6 +238,16 @@ public ResponseEntity<?> createSupportRequest(
         if (question == null || question.isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Question is required");
+        }
+
+        if (question.length() > 500) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Question cannot exceed 500 characters");
+        }
+
+        if (!question.matches("^[A-Za-z0-9 .,!?\\-()čćžšđČĆŽŠĐ]*$")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Question contains invalid characters");
         }
 
         User user = queryService.getUserById(userId);

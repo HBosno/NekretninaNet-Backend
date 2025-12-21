@@ -5,6 +5,10 @@ import com.nekretninanet.backend.view.ReviewViews;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nekretninanet.backend.view.UserViews;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "users")
@@ -15,27 +19,49 @@ public class User {
     @JsonView({UserViews.RegularUserSummary.class, UserViews.SupportAccountSummary.class})
     private Long id;
 
-    @Column(name = "first_name")
+    @Column(name = "first_name", nullable = false, length = 50)
+    @Size(max = 50, message = "First name cannot exceed 50 characters")
+    @Pattern(regexp = "^[A-Za-zČĆŽŠĐčćžšđ -]+$", message = "First name can contain only letters, spaces, and dashes")
+    @NotBlank(message = "First name cannot be blank")
     @JsonView({UserViews.RegularUserSummary.class, UserViews.SupportAccountSummary.class})
     private String firstName;
 
-    @Column(name = "last_name")
+    @Column(name = "last_name", nullable = false, length = 50)
+    @NotBlank(message = "Last name cannot be blank")
+    @Size(max = 50, message = "Last name cannot exceed 50 characters")
+    @Pattern(regexp = "^[A-Za-zČĆŽŠĐčćžšđ -]+$", message = "Last name can contain only letters, spaces, and dashes")
     @JsonView({UserViews.RegularUserSummary.class, UserViews.SupportAccountSummary.class})
     private String lastName;
 
-    @Column(unique = true)
+    @Column(nullable = false, unique = true, length = 15)
+    @NotBlank(message = "Username cannot be blank")
+    @Size(min = 4, max = 15, message = "Username must be between 4 and 15 characters")
+    @Pattern(
+            regexp = "^[A-Za-z0-9._]+$",
+            message = "Username can contain only letters, numbers, dot and underscore"
+    )
     @JsonView({UserViews.RegularUserSummary.class, QueryViews.SupportRequestSummary.class, ReviewViews.SupportReviewSummary.class})
     private String username;
 
-    @Column(name = "hash_password")
+    @Column(name = "hash_password", nullable = false)
+    @NotBlank(message = "Password cannot be blank")
     private String hashPassword;
-
+    @Column(length = 100)
+    @Size(max = 100, message = "Address cannot exceed 100 characters")
     @JsonView(UserViews.RegularUserSummary.class)
     private String address;
+    @Column(nullable = false, unique = true, length = 50)
+    @NotBlank(message = "Email cannot be blank")
+    @Email(message = "Email must be valid")
+    @Size(max = 50, message = "Email cannot exceed 50 characters")
     @JsonView({UserViews.RegularUserSummary.class, UserViews.SupportAccountSummary.class})
     private String email;
 
-    @Column(name = "phone_number")
+    @Column(name = "phone_number", unique = true)
+    @Pattern(
+            regexp = "^\\d{3}-\\d{3}-\\d{3}$",
+            message = "Phone number format must be XXX-XXX-XXX"
+    )
     @JsonView(UserViews.RegularUserSummary.class)
     private String phoneNumber;
 

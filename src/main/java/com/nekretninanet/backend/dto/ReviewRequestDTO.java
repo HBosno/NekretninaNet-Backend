@@ -1,7 +1,14 @@
 package com.nekretninanet.backend.dto;
 
+import jakarta.validation.constraints.*;
+
 public class ReviewRequestDTO {
+    @NotNull(message = "Rating is required")
+    @Min(value = 1, message = "Rating must be at least 1")
+    @Max(value = 5, message = "Rating cannot be greater than 5")
     private Integer rating;
+    @Size(max = 100, message = "Comment cannot be longer than 100 characters")
+    @Pattern(regexp = "^[A-Za-z0-9 .,!?\\-()čćžšđČĆŽŠĐ]*$", message = "Comment contains invalid characters")
     private String comment;
 
     // Getteri i setteri

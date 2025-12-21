@@ -35,7 +35,11 @@ public class UserService {
 
     public void register(RegisterRequestDto dto) {
         if (userRepository.existsByUsername(dto.getUsername())) {
-            throw new IllegalArgumentException("Username already exists");
+            throw new BadRequestException("Username already exists");
+        }
+
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            throw new BadRequestException("Email already exists");
         }
 
         User user = new User();
@@ -52,10 +56,10 @@ public class UserService {
 
     public User login(LoginRequestDto dto) {
         User user = userRepository.findByUsername(dto.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
 
         if (!passwordEncoder.matches(dto.getPassword(), user.getHashPassword())) {
-            throw new IllegalArgumentException("Invalid credentials");
+            throw new BadRequestException("Invalid credentials");
         }
 
         return user;
@@ -86,7 +90,7 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Regular user not found"));
 
         if (user.getUserType() != UserType.USER) {
-            throw new IllegalArgumentException("User is not a regular account");
+            throw new BadRequestException("User is not a regular account");
         }
 
         return user;
@@ -114,8 +118,12 @@ public class UserService {
 
     public User createSupportUser(CreateSupportUserRequest req) {
 
-        if (userRepository.findByUsername(req.getUsername()).isPresent()) {
+        if (userRepository.existsByUsername(req.getUsername())) {
             throw new BadRequestException("Username already exists.");
+        }
+
+        if (userRepository.existsByEmail(req.getEmail())) {
+            throw new BadRequestException("Email already exists.");
         }
 
         validatePassword(req.getPassword());
@@ -149,11 +157,25 @@ public class UserService {
             throw new BadRequestException("User is not a support account");
         }
 
-        if (dto.getUsername() != null) {
-            if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
-                throw new BadRequestException("Username already exists.");
-            }
-            user.setUsername(dto.getUsername());
+        // Provjera username
+        if (dto.getUsername() != null &&
+                !dto.getUsername().equals(user.getUsername()) &&
+                userRepository.existsByUsernameAndIdNot(dto.getUsername(), user.getId())) {
+            throw new BadRequestException("Username already exists.");
+        }
+
+        // Provjera email
+        if (dto.getEmail() != null &&
+                !dto.getEmail().equals(user.getEmail()) &&
+                userRepository.existsByEmailAndIdNot(dto.getEmail(), user.getId())) {
+            throw new BadRequestException("Email already exists.");
+        }
+
+        // Provjera phoneNumber
+        if (dto.getPhoneNumber() != null &&
+                !dto.getPhoneNumber().equals(user.getPhoneNumber()) &&
+                userRepository.existsByPhoneNumberAndIdNot(dto.getPhoneNumber(), user.getId())) {
+            throw new BadRequestException("Phone number already in use");
         }
 
         if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());
@@ -175,7 +197,28 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Regular user not found"));
 
         if (user.getUserType() != UserType.USER) {
-            throw new IllegalArgumentException("User is not a regular account");
+            throw new BadRequestException("User is not a regular account");
+        }
+
+        // Provjera username
+        if (dto.getUsername() != null &&
+                !dto.getUsername().equals(user.getUsername()) &&
+                userRepository.existsByUsernameAndIdNot(dto.getUsername(), user.getId())) {
+            throw new BadRequestException("Username already exists.");
+        }
+
+        // Provjera email
+        if (dto.getEmail() != null &&
+                !dto.getEmail().equals(user.getEmail()) &&
+                userRepository.existsByEmailAndIdNot(dto.getEmail(), user.getId())) {
+            throw new BadRequestException("Email already exists.");
+        }
+
+        // Provjera phoneNumber
+        if (dto.getPhoneNumber() != null &&
+                !dto.getPhoneNumber().equals(user.getPhoneNumber()) &&
+                userRepository.existsByPhoneNumberAndIdNot(dto.getPhoneNumber(), user.getId())) {
+            throw new BadRequestException("Phone number already in use");
         }
 
         if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());

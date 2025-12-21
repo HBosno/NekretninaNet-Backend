@@ -7,13 +7,15 @@ import java.time.LocalDate;
     vezu sa realestate. endpoint GET /support/reviews iz reviewcontroller
 */
 public class ReviewDTO {
+    private Long id;
     private Integer rating;
     private String comment;
     private LocalDate date;
     private String status;
     private String username;
 
-    public ReviewDTO(Integer rating, String comment, LocalDate date, String status, String username) {
+    public ReviewDTO(Long id, Integer rating, String comment, LocalDate date, String status, String username) {
+        this.id=id;
         this.rating = rating;
         this.comment = comment;
         this.date = date;
@@ -21,6 +23,8 @@ public class ReviewDTO {
         this.username = username;
     }
 
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     public Integer getRating() {
         return rating;
     }

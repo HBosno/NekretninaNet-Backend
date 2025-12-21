@@ -11,6 +11,7 @@ import com.nekretninanet.backend.model.RealEstate;
 import com.nekretninanet.backend.model.User;
 import com.nekretninanet.backend.repository.RealEstateRepository;
 import com.nekretninanet.backend.repository.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -58,13 +59,9 @@ public class ReviewController {
     public ResponseEntity<?> createReview(
             @PathVariable Long userId,
             @PathVariable Long realEstateId,
-            @RequestBody ReviewRequestDTO body
+            @Valid @RequestBody ReviewRequestDTO body
     ) {
         try {
-            if (body.getRating() == null || body.getComment() == null || body.getComment().isBlank()) {
-                return ResponseEntity.badRequest().body("Rating and comment are required");
-            }
-
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -82,6 +79,7 @@ public class ReviewController {
             Review saved = reviewService.saveReview(review);
 
             ReviewDTO response = new ReviewDTO(
+                    saved.getId(),
                     saved.getRating(),
                     saved.getComment(),
                     saved.getDate(),
@@ -102,7 +100,7 @@ public class ReviewController {
     @PatchMapping("/user/review/{id}")
     public ResponseEntity<?> updateReview(
             @PathVariable Long id,
-            @RequestBody ReviewRequestDTO body
+            @Valid @RequestBody ReviewRequestDTO body
     ) {
         try {
             Review review = reviewService.getReviewById(id)
@@ -120,6 +118,7 @@ public class ReviewController {
             Review updated = reviewService.saveReview(review);
 
             ReviewDTO response = new ReviewDTO(
+                    updated.getId(),
                     updated.getRating(),
                     updated.getComment(),
                     updated.getDate(),
@@ -144,10 +143,11 @@ public class ReviewController {
     }
 
     @GetMapping("/user/real-estate/reviews/{id}")
-    public ResponseEntity<List<Review>> getReviewsByRealEstateId(@PathVariable Long id) {
-        List<Review> reviews = reviewService.getReviewsByRealEstateId(id);
-        return reviews.isEmpty()
-                ? ResponseEntity.noContent().build()
-                : ResponseEntity.ok(reviews);
+    public ResponseEntity<List<ReviewDTO>> getReviewsByRealEstateId(@PathVariable Long id) {
+        List<ReviewDTO> reviews = reviewService.getActiveReviewsByRealEstateId(id);
+        if (reviews.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(reviews);
     }
 }

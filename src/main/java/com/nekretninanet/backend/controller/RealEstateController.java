@@ -9,6 +9,7 @@ import com.nekretninanet.backend.model.RealEstate;
 import com.nekretninanet.backend.model.RealEstateStatus;
 import com.nekretninanet.backend.model.User;
 import com.nekretninanet.backend.service.RealEstateService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import java.time.LocalDate;
@@ -147,7 +148,7 @@ public ResponseEntity<List<RealEstateFullDTO>> getRealEstatesByUsername(
 
 
     @PostMapping
-    public ResponseEntity<RealEstateStatusDTO> createRealEstate(@RequestBody RealEstateCreateDTO dto) {
+    public ResponseEntity<RealEstateStatusDTO> createRealEstate(@Valid @RequestBody RealEstateCreateDTO dto) {
         try {
             RealEstate realEstate = new RealEstate();
             realEstate.setTitle(dto.getTitle());
@@ -187,7 +188,7 @@ public ResponseEntity<List<RealEstateFullDTO>> getRealEstatesByUsername(
    @PatchMapping("/{id}")
 public ResponseEntity<RealEstateStatusDTO> updateRealEstatePartially(
         @PathVariable Long id,
-        @RequestBody RealEstateUpdateDTO updates
+        @Valid @RequestBody RealEstateUpdateDTO updates
 ) {
     try {
         RealEstate existing = service.getRealEstateById(id);

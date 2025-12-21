@@ -3,6 +3,11 @@ package com.nekretninanet.backend.model;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nekretninanet.backend.view.QueryViews;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDate;
 
 @Entity
@@ -13,23 +18,37 @@ public class Query {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonView({QueryViews.SupportRequestSummary.class, QueryViews.SupportRequestResponseSummary.class})
     private Long id;
-
+    @NotNull(message = "Query date cannot be null")
+    @FutureOrPresent(message = "Query date cannot be in the past")
     @Column(name = "query_date")
     @JsonView(QueryViews.SupportRequestSummary.class)
     private LocalDate queryDate;
+    @Size(max = 500, message = "Question cannot be longer than 500 characters")
+    @Pattern(
+            regexp = "^[A-Za-z0-9 .,!?\\-()čćžšđČĆŽŠĐ]*$",
+            message = "Question contains invalid characters"
+    )
     @JsonView(QueryViews.SupportRequestSummary.class)
     private String question;
+    @Size(max = 500, message = "Response cannot be longer than 500 characters")
+    @Pattern(
+            regexp = "^[A-Za-z0-9 .,!?\\-()čćžšđČĆŽŠĐ]*$",
+            message = "Response contains invalid characters"
+    )
     @JsonView({QueryViews.SupportRequestSummary.class, QueryViews.SupportRequestResponseSummary.class})
     private String response;
+    @NotNull(message = "Query type cannot be null")
     @Enumerated(EnumType.STRING)
     @Column(name = "query_type")
     private QueryType queryType;
+    @NotNull(message = "Status cannot be null")
     @Enumerated(EnumType.STRING)
     @JsonView({QueryViews.SupportRequestSummary.class, QueryViews.SupportRequestResponseSummary.class})
     private QueryStatus status;
 
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false)
+    @NotNull(message = "User cannot be null")
     @JsonView(QueryViews.SupportRequestSummary.class)
     private User user;
 

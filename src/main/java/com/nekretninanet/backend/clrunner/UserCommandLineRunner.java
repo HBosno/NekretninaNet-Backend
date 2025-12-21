@@ -38,6 +38,7 @@ public class UserCommandLineRunner implements CommandLineRunner {
     public void run(String... args) throws Exception {
         // TEST 1: da @PatchMapping("/admin/support-accounts/{id}") zaista mijenja pass i hashira...
         // uspjesan test ce prikazivat razlicite usernameove i hasheve
+        /*
         CreateSupportUserRequest user1 = new CreateSupportUserRequest("Test Name",
                 "Test lastName",
                 "test",
@@ -56,15 +57,15 @@ public class UserCommandLineRunner implements CommandLineRunner {
         Optional<User> nasUser1 = userRepository.findByUsername("novo");
         System.out.println(nasUser1.get().getUsername());
         System.out.println(nasUser1.get().getHashPassword());
-
+        */
         // TEST 2: @DeleteMapping("/admin/support-accounts/{id}")
-        testCascadingDelete();
+    //    testCascadingDelete();
 
         // TEST 3: @DeleteMapping("/support/regular-users-accounts/{id}") i @DeleteMapping("/user/account/{id}"), ista metoda
-        testRegularUserCascadingDelete();
+   //     testRegularUserCascadingDelete();
 
         // TEST 4: @DeleteMapping("/support/review/{id}")
-        testDeleteReview();
+  //      testDeleteReview();
 /*
         userService.createRegularUser(user);
 
