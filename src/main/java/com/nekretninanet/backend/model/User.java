@@ -33,10 +33,13 @@ public class User {
     @JsonView({UserViews.RegularUserSummary.class, UserViews.SupportAccountSummary.class})
     private String lastName;
 
-    @Column(nullable = false, unique = true, length = 10)
+    @Column(nullable = false, unique = true, length = 15)
     @NotBlank(message = "Username cannot be blank")
-    @Size(min = 4, max = 10, message = "Username must be between 4 and 10 characters")
-    @Pattern(regexp = "^[A-Za-z._]+$", message = "Username can contain only letters, dot and underscore")
+    @Size(min = 4, max = 15, message = "Username must be between 4 and 15 characters")
+    @Pattern(
+            regexp = "^[A-Za-z0-9._]+$",
+            message = "Username can contain only letters, numbers, dot and underscore"
+    )
     @JsonView({UserViews.RegularUserSummary.class, QueryViews.SupportRequestSummary.class, ReviewViews.SupportReviewSummary.class})
     private String username;
 
@@ -54,8 +57,11 @@ public class User {
     @JsonView({UserViews.RegularUserSummary.class, UserViews.SupportAccountSummary.class})
     private String email;
 
-    @Column(name = "phone_number", length = 10)
-    @Pattern(regexp = "^\\d{3}-\\d{3}-\\d{3}$", message = "Phone number format must be XXX-XXX-XXX")
+    @Column(name = "phone_number", unique = true)
+    @Pattern(
+            regexp = "^\\d{3}-\\d{3}-\\d{3}$",
+            message = "Phone number format must be XXX-XXX-XXX"
+    )
     @JsonView(UserViews.RegularUserSummary.class)
     private String phoneNumber;
 

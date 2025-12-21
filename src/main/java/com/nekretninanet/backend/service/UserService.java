@@ -157,18 +157,25 @@ public class UserService {
             throw new BadRequestException("User is not a support account");
         }
 
+        // Provjera username
         if (dto.getUsername() != null &&
                 !dto.getUsername().equals(user.getUsername()) &&
-                userRepository.existsByUsername(dto.getUsername())) {
-
+                userRepository.existsByUsernameAndIdNot(dto.getUsername(), user.getId())) {
             throw new BadRequestException("Username already exists.");
         }
 
+        // Provjera email
         if (dto.getEmail() != null &&
                 !dto.getEmail().equals(user.getEmail()) &&
-                userRepository.existsByEmail(dto.getEmail())) {
-
+                userRepository.existsByEmailAndIdNot(dto.getEmail(), user.getId())) {
             throw new BadRequestException("Email already exists.");
+        }
+
+        // Provjera phoneNumber
+        if (dto.getPhoneNumber() != null &&
+                !dto.getPhoneNumber().equals(user.getPhoneNumber()) &&
+                userRepository.existsByPhoneNumberAndIdNot(dto.getPhoneNumber(), user.getId())) {
+            throw new BadRequestException("Phone number already in use");
         }
 
         if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());
@@ -193,18 +200,25 @@ public class UserService {
             throw new BadRequestException("User is not a regular account");
         }
 
+        // Provjera username
         if (dto.getUsername() != null &&
                 !dto.getUsername().equals(user.getUsername()) &&
-                userRepository.existsByUsername(dto.getUsername())) {
-
+                userRepository.existsByUsernameAndIdNot(dto.getUsername(), user.getId())) {
             throw new BadRequestException("Username already exists.");
         }
 
+        // Provjera email
         if (dto.getEmail() != null &&
                 !dto.getEmail().equals(user.getEmail()) &&
-                userRepository.existsByEmail(dto.getEmail())) {
-
+                userRepository.existsByEmailAndIdNot(dto.getEmail(), user.getId())) {
             throw new BadRequestException("Email already exists.");
+        }
+
+        // Provjera phoneNumber
+        if (dto.getPhoneNumber() != null &&
+                !dto.getPhoneNumber().equals(user.getPhoneNumber()) &&
+                userRepository.existsByPhoneNumberAndIdNot(dto.getPhoneNumber(), user.getId())) {
+            throw new BadRequestException("Phone number already in use");
         }
 
         if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());

@@ -24,8 +24,11 @@ public class CreateSupportUserRequest {
     private String lastName;
 
     @NotBlank(message = "Username cannot be blank")
-    @Size(min = 4, max = 10, message = "Username must be between 4 and 10 characters")
-    @Pattern(regexp = "^[A-Za-z._]+$", message = "Username can contain only letters, dot, and underscore")
+    @Size(min = 4, max = 15, message = "Username must be between 4 and 15 characters")
+    @Pattern(
+            regexp = "^[A-Za-z0-9._]+$",
+            message = "Username can contain only letters, numbers, dot and underscore"
+    )
     private String username;
 
     @NotBlank(message = "Password cannot be blank")
@@ -38,7 +41,10 @@ public class CreateSupportUserRequest {
     @Email(message = "Email must be valid")
     @Size(max = 50, message = "Email cannot exceed 50 characters")
     private String email;
-    @Pattern(regexp = "^\\d{3}-\\d{3}-\\d{3}$", message = "Phone number format must be XXX-XXX-XXX")
+    @Pattern(
+            regexp = "^\\d{3}-\\d{3}-\\d{3}$",
+            message = "Phone number format must be XXX-XXX-XXX"
+    )
     private String phoneNumber;
 
     public String getFirstName() {

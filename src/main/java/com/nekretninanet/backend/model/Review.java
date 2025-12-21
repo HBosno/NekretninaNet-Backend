@@ -22,7 +22,7 @@ public class Review {
     private Integer rating;
     @JsonView(ReviewViews.SupportReviewSummary.class)
     @Size(max = 100, message = "Comment cannot be longer than 100 characters")
-    @Pattern(regexp = "^[A-Za-z0-9 .,!?\\-()]*$", message = "Comment contains invalid characters")
+    @Pattern(regexp = "^[A-Za-z0-9 .,!?\\-()čćžšđČĆŽŠĐ]*$", message = "Comment contains invalid characters")
     private String comment;
     @JsonView(ReviewViews.SupportReviewSummary.class)
     @NotNull(message = "Date is required")

@@ -83,7 +83,7 @@ public ResponseEntity<?> createRealEstateQuery(
                     .body("Question cannot exceed 500 characters");
         }
 
-        if (!question.matches("^[A-Za-z0-9 .,!?\\-()]*$")) {
+        if (!question.matches("^[A-Za-z0-9 .,!?\\-()čćžšđČĆŽŠĐ]*$")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Question contains invalid characters");
         }
@@ -193,7 +193,7 @@ public ResponseEntity<?> updateQuery(
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Response cannot exceed 500 characters");
             }
-            if (!response.matches("^[A-Za-z0-9 .,!?\\-()]*$")) {
+            if (!response.matches("^[A-Za-z0-9 .,!?\\-()čćžšđČĆŽŠĐ]*$")) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Response contains invalid characters");
             }
@@ -245,7 +245,7 @@ public ResponseEntity<?> createSupportRequest(
                     .body("Question cannot exceed 500 characters");
         }
 
-        if (!question.matches("^[A-Za-z0-9 .,!?\\-()]*$")) {
+        if (!question.matches("^[A-Za-z0-9 .,!?\\-()čćžšđČĆŽŠĐ]*$")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Question contains invalid characters");
         }

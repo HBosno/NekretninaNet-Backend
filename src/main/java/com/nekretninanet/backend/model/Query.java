@@ -25,14 +25,14 @@ public class Query {
     private LocalDate queryDate;
     @Size(max = 500, message = "Question cannot be longer than 500 characters")
     @Pattern(
-            regexp = "^[A-Za-z0-9 .,!?\\-()]*$",
+            regexp = "^[A-Za-z0-9 .,!?\\-()čćžšđČĆŽŠĐ]*$",
             message = "Question contains invalid characters"
     )
     @JsonView(QueryViews.SupportRequestSummary.class)
     private String question;
     @Size(max = 500, message = "Response cannot be longer than 500 characters")
     @Pattern(
-            regexp = "^[A-Za-z0-9 .,!?\\-()]*$",
+            regexp = "^[A-Za-z0-9 .,!?\\-()čćžšđČĆŽŠĐ]*$",
             message = "Response contains invalid characters"
     )
     @JsonView({QueryViews.SupportRequestSummary.class, QueryViews.SupportRequestResponseSummary.class})

@@ -8,7 +8,7 @@ public class ReviewRequestDTO {
     @Max(value = 5, message = "Rating cannot be greater than 5")
     private Integer rating;
     @Size(max = 100, message = "Comment cannot be longer than 100 characters")
-    @Pattern(regexp = "^[A-Za-z0-9 .,!?\\-()]*$", message = "Comment contains invalid characters")
+    @Pattern(regexp = "^[A-Za-z0-9 .,!?\\-()čćžšđČĆŽŠĐ]*$", message = "Comment contains invalid characters")
     private String comment;
 
     // Getteri i setteri
