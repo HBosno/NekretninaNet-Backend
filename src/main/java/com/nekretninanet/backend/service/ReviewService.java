@@ -70,8 +70,18 @@ public class ReviewService {
         return reviewRepository.save(review);
     }
 
-    public List<Review> getReviewsByRealEstateId(Long realEstateId) {
-        return reviewRepository.findByRealEstateId(realEstateId);
+    public List<ReviewDTO> getActiveReviewsByRealEstateId(Long realEstateId) {
+        return reviewRepository.findByRealEstateId(realEstateId).stream()
+                .filter(r -> r.getStatus() == ReviewStatus.ACTIVE)
+                .map(r -> new ReviewDTO(
+                        r.getId(),
+                        r.getRating(),
+                        r.getComment(),
+                        r.getDate(),
+                        r.getStatus().name(),
+                        r.getUser().getUsername()
+                ))
+                .toList();
     }
 
     public Review updateReview(Long reviewId, Integer rating, String comment, ReviewStatus status) {

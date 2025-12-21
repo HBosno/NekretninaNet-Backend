@@ -79,6 +79,7 @@ public class ReviewController {
             Review saved = reviewService.saveReview(review);
 
             ReviewDTO response = new ReviewDTO(
+                    saved.getId(),
                     saved.getRating(),
                     saved.getComment(),
                     saved.getDate(),
@@ -117,6 +118,7 @@ public class ReviewController {
             Review updated = reviewService.saveReview(review);
 
             ReviewDTO response = new ReviewDTO(
+                    updated.getId(),
                     updated.getRating(),
                     updated.getComment(),
                     updated.getDate(),
@@ -141,10 +143,11 @@ public class ReviewController {
     }
 
     @GetMapping("/user/real-estate/reviews/{id}")
-    public ResponseEntity<List<Review>> getReviewsByRealEstateId(@PathVariable Long id) {
-        List<Review> reviews = reviewService.getReviewsByRealEstateId(id);
-        return reviews.isEmpty()
-                ? ResponseEntity.noContent().build()
-                : ResponseEntity.ok(reviews);
+    public ResponseEntity<List<ReviewDTO>> getReviewsByRealEstateId(@PathVariable Long id) {
+        List<ReviewDTO> reviews = reviewService.getActiveReviewsByRealEstateId(id);
+        if (reviews.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(reviews);
     }
 }
