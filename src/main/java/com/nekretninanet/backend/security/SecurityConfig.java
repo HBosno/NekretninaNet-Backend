@@ -32,12 +32,20 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtFilter) throws Exception {
+        // Definiraj handler
+        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+        // Postavi breascrumb na null da bi se token učitavao pri svakom zahtjevu (važno za Postman/SPA)
+        requestHandler.setCsrfRequestAttributeName(null);
+
         http
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/h2-console/**", "/auth/register", "/auth/login", "/auth/logout")
+                                //.disable()
+                        .ignoringRequestMatchers("/h2-console/**", "/auth/register", "/auth/login")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // Frontend čita XSRF-TOKEN
-                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                        //.csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                        .csrfTokenRequestHandler(requestHandler) // DODAJ OVO
                 )
+                .cors(org.springframework.security.config.Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v3/api-docs/**",

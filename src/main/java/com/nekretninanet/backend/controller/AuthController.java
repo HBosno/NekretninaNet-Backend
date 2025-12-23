@@ -8,6 +8,7 @@ import com.nekretninanet.backend.security.CustomUserDetailsService;
 import com.nekretninanet.backend.security.JwtUtil;
 import com.nekretninanet.backend.service.TokenVersionService;
 import com.nekretninanet.backend.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -70,7 +72,16 @@ public class AuthController {
     }
 
     @GetMapping("/auth/me")
-    public ResponseEntity<LoginResponseDto> getCurrentUser(Authentication auth) {
+    public ResponseEntity<LoginResponseDto> getCurrentUser(Authentication auth, HttpServletRequest request) {
+        //CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+        //CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+        /*if (csrfToken != null) {
+            System.out.println("CSRF Token generisan: " + csrfToken.getToken());
+        }
+
+         */
+
+
         if (auth == null || !auth.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
