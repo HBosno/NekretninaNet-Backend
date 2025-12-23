@@ -12,6 +12,7 @@ import com.nekretninanet.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -33,6 +34,9 @@ public class UserCommandLineRunner implements CommandLineRunner {
     private QueryRepository queryRepository;
     @Autowired
     private ReviewRepository reviewRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
@@ -84,6 +88,43 @@ public class UserCommandLineRunner implements CommandLineRunner {
      //   System.out.println(userService.getAllSupportUsers());
         System.out.println("------------------------------------------------");
 */
+
+
+        User adminUser = new User();
+        adminUser.setFirstName("Ime");
+        adminUser.setLastName("Prezime");
+        adminUser.setEmail("admin@mail.com");
+        adminUser.setUserType(UserType.ADMIN);
+        adminUser.setAddress("adresa 1");
+        adminUser.setHashPassword(passwordEncoder.encode("Sifrazaadmina1"));
+        adminUser.setPhoneNumber("123-456-783");
+        adminUser.setUsername("admin");
+        userRepository.save(adminUser);
+
+
+        User supportUser = new User();
+        supportUser.setFirstName("ImePodrske");
+        supportUser.setLastName("PrezimePodrske");
+        supportUser.setEmail("support@mail.com");
+        supportUser.setUserType(UserType.SUPPORT);
+        supportUser.setAddress("adresa 2");
+        supportUser.setHashPassword(passwordEncoder.encode("Sifrazasupport"));
+        supportUser.setPhoneNumber("789-457-478");
+        supportUser.setUsername("support");
+        userRepository.save(supportUser);
+
+        User user = new User();
+        user.setFirstName("ImeUsera");
+        user.setLastName("PrezimeUsera");
+        user.setEmail("user@mail.com");
+        user.setUserType(UserType.USER);
+        user.setAddress("adresa 3");
+        user.setHashPassword(passwordEncoder.encode("Sifrazausera1"));
+        user.setPhoneNumber("758-142-459");
+        user.setUsername("user");
+        userRepository.save(user);
+
+
     }
 
     private void testCascadingDelete() {

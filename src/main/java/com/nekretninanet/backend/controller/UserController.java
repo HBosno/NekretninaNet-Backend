@@ -9,6 +9,7 @@ import com.nekretninanet.backend.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nekretninanet.backend.view.UserViews;
@@ -27,6 +28,7 @@ public class UserController {
 
 
     @GetMapping("/admin/support-accounts")
+    @PreAuthorize("hasRole('ADMIN')")
     @JsonView(UserViews.SupportAccountSummary.class)
     public ResponseEntity<List<User>> getAllSupportAccounts() {
         List<User> supportUsers = userService.getAllSupportUsers();
@@ -56,6 +58,7 @@ public class UserController {
     }
 
     @GetMapping("/support/regular-users-accounts")
+    @PreAuthorize("hasRole('SUPPORT')")
     @JsonView(UserViews.RegularUserSummary.class)
     public ResponseEntity<List<User>> getAllRegularUsers() {
         List<User> regularUsers = userService.getAllRegularUsers();

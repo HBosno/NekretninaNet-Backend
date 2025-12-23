@@ -9,12 +9,16 @@ import com.nekretninanet.backend.model.RealEstate;
 import com.nekretninanet.backend.model.RealEstateStatus;
 import com.nekretninanet.backend.model.User;
 import com.nekretninanet.backend.service.RealEstateService;
+import com.nekretninanet.backend.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,9 +26,11 @@ import org.springframework.web.bind.annotation.*;
 public class RealEstateController {
 
     private final RealEstateService service;
+    private final UserService userService;
 
-    public RealEstateController(RealEstateService service) {
+    public RealEstateController(RealEstateService service, UserService userService) {
         this.service = service;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -115,17 +121,16 @@ public class RealEstateController {
     }
 
     @GetMapping("/user/username/{username}")
-public ResponseEntity<List<RealEstateFullDTO>> getRealEstatesByUsername(
-        @PathVariable String username
-) {
-    try {
-        List<RealEstate> estates = service.getByUsername(username);
+    public ResponseEntity<List<RealEstateFullDTO>> getRealEstatesByUsername(@PathVariable String username) {
+        try
+        {
+            List<RealEstate> estates = service.getByUsername(username);
 
-        if (estates.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        }
+            if (estates.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            }
 
-        List<RealEstateFullDTO> dtoList = estates.stream()
+            List<RealEstateFullDTO> dtoList = estates.stream()
                 .map(e -> new RealEstateFullDTO(
                         e.getId(),
                         e.getTitle(),
@@ -138,8 +143,7 @@ public ResponseEntity<List<RealEstateFullDTO>> getRealEstatesByUsername(
                         e.getStatus().name()
                 ))
                 .toList();
-
-        return ResponseEntity.ok(dtoList);
+            return ResponseEntity.ok(dtoList);
 
     } catch (RuntimeException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -148,8 +152,10 @@ public ResponseEntity<List<RealEstateFullDTO>> getRealEstatesByUsername(
 
 
     @PostMapping
-    public ResponseEntity<RealEstateStatusDTO> createRealEstate(@Valid @RequestBody RealEstateCreateDTO dto) {
+    public ResponseEntity<RealEstateStatusDTO> createRealEstate(@Valid @RequestBody RealEstateCreateDTO dto,
+                                                                @AuthenticationPrincipal UserDetails userDetails) {
         try {
+            System.out.println("--------------ID trentnog usera: "+ userService.findByUsername(userDetails.getUsername()).getId());
             RealEstate realEstate = new RealEstate();
             realEstate.setTitle(dto.getTitle());
             realEstate.setPrice(dto.getPrice());

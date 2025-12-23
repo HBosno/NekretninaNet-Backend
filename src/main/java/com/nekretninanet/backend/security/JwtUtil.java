@@ -20,11 +20,13 @@ public class JwtUtil {
     }
 
 
-    public String generateToken(UserDetails user) {
+    public String generateToken(UserDetails user, Long userId, int tokenVersion) {
         long expirationTime = 1000L * 60 * 60; // 1h
 
         return Jwts.builder()
                 .setSubject(user.getUsername())
+                .claim("userId", userId)
+                .claim("tokenVersion", tokenVersion)
                 .claim("role", user.getAuthorities())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
@@ -39,6 +41,24 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    public Long extractUserId(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("userId", Long.class);
+    }
+
+    public Integer extractTokenVersion(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("tokenVersion", Integer.class);
     }
 
     public boolean isTokenExpired(String token) {
