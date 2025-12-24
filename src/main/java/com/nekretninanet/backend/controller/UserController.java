@@ -36,6 +36,7 @@ public class UserController {
     }
 
     @PostMapping("/admin/support-accounts")
+    @PreAuthorize("hasRole('ADMIN')")
     @JsonView(UserViews.SupportAccountSummary.class)
     public ResponseEntity<User> createSupportAccount(@RequestBody @Valid CreateSupportUserRequest request) {
         User created = userService.createSupportUser(request);
@@ -43,6 +44,7 @@ public class UserController {
     }
 
     @PatchMapping("/admin/support-accounts/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @JsonView(UserViews.SupportAccountSummary.class)
     public ResponseEntity<User> updateSupportAccount(
             @PathVariable Long id,
@@ -52,6 +54,7 @@ public class UserController {
     }
 
     @DeleteMapping("/admin/support-accounts/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteSupportAccount(@PathVariable Long id) {
         userService.deleteSupportUserCascading(id);
         return ResponseEntity.ok().build();
@@ -66,6 +69,7 @@ public class UserController {
     }
 
     @PatchMapping("/support/regular-users-accounts/{id}")
+    @PreAuthorize("hasRole('SUPPORT')")
     @JsonView(UserViews.RegularUserSummary.class)
     public ResponseEntity<User> updateRegularUserBySupport(
             @PathVariable Long id,
@@ -75,12 +79,14 @@ public class UserController {
     }
 
     @DeleteMapping("/support/regular-users-accounts/{id}")
+    @PreAuthorize("hasRole('SUPPORT')")
     public ResponseEntity<Void> deleteRegularUserBySupport(@PathVariable Long id) {
         userService.deleteRegularUserCascading(id);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/user/account/{id}")
+    @PreAuthorize("hasRole('USER')")
     @JsonView(UserViews.RegularUserSummary.class)
     public ResponseEntity<User> getRegularUserById(@PathVariable Long id) {
         User user = userService.getRegularUserById(id);
@@ -93,6 +99,7 @@ public class UserController {
         role based access
     */
     @PatchMapping("/user/account/{id}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<User> updateRegularUserByRegular(
             @PathVariable Long id,
             @Valid @RequestBody UpdateUserDTO dto) {
@@ -102,6 +109,7 @@ public class UserController {
 
     // analogno kao za prethodni endpoint. vec postoji identicna logika za delete /support/regular-users-accounts/{username}
     @DeleteMapping("/user/account/{id}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> deleteRegularUserByRegular(@PathVariable Long id) {
         userService.deleteRegularUserCascading(id);
         return ResponseEntity.ok().build();
