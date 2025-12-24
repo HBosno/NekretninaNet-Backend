@@ -15,6 +15,7 @@ import com.nekretninanet.backend.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +47,7 @@ public class ReviewController {
     /* ===================== SUPPORT ===================== */
 
     @GetMapping("/support/reviews")
+    @PreAuthorize("hasRole('SUPPORT')")
     @JsonView(ReviewViews.SupportReviewSummary.class)
     public ResponseEntity<List<Review>> getReviewsByUsername(
             @RequestParam String username) {
@@ -54,6 +56,7 @@ public class ReviewController {
     }
 
     @DeleteMapping("/support/review/{id}")
+    @PreAuthorize("hasRole('SUPPORT')")
     public ResponseEntity<Void> deleteReviewBySupport(@PathVariable Long id) {
         reviewService.deleteReview(id);
         return ResponseEntity.noContent().build();
@@ -62,6 +65,7 @@ public class ReviewController {
     /* ===================== USER ===================== */
 
     @PostMapping("/user/review/{realEstateId}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> createReview(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long realEstateId,
@@ -103,6 +107,7 @@ public class ReviewController {
     }
 
     @PatchMapping("/user/review/{id}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> updateReview(
             @PathVariable Long id,
             @Valid @RequestBody ReviewRequestDTO body
@@ -142,12 +147,14 @@ public class ReviewController {
     }
 
     @DeleteMapping("/user/review/{id}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> deleteReviewByUser(@PathVariable Long id) {
         reviewService.deleteReview(id);
         return ResponseEntity.ok("Review successfully deleted");
     }
 
     @GetMapping("/user/real-estate/reviews/{id}")
+    @PreAuthorize("hasRole('SUPPORT')")
     public ResponseEntity<List<ReviewDTO>> getReviewsByRealEstateId(@PathVariable Long id) {
         List<ReviewDTO> reviews = reviewService.getActiveReviewsByRealEstateId(id);
         if (reviews.isEmpty()) {

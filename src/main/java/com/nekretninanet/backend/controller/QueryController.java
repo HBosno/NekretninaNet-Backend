@@ -11,6 +11,7 @@ import com.nekretninanet.backend.service.QueryService;
 import com.nekretninanet.backend.service.UserService;
 import com.nekretninanet.backend.view.QueryViews;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,6 +55,7 @@ public class QueryController {
     /* ===================== SUPPORT ===================== */
 
     @GetMapping("/support/requests")
+    @PreAuthorize("hasRole('SUPPORT')")
     @JsonView(QueryViews.SupportRequestSummary.class)
     public ResponseEntity<List<Query>> getAllSupportRequests() {
         List<Query> requests = queryService.getAllSupportRequests();
@@ -61,6 +63,7 @@ public class QueryController {
     }
     @JsonView(QueryViews.SupportRequestResponseSummary.class)
     @PatchMapping("/support/request/{id}")
+    @PreAuthorize("hasRole('SUPPORT')")
     public ResponseEntity<Query> respondToSupportRequest(
             @PathVariable Long id,
             @Valid @RequestBody SupportRequestResponseDto dto
@@ -72,6 +75,7 @@ public class QueryController {
     /* ===================== USER ===================== */
 
    @PostMapping("/user/real-estate-query/{realEstateId}")
+   @PreAuthorize("hasRole('USER')")
 public ResponseEntity<?> createRealEstateQuery(
         @PathVariable Long realEstateId,
         @AuthenticationPrincipal UserDetails userDetails,
@@ -143,6 +147,7 @@ public ResponseEntity<?> createRealEstateQuery(
 
 
     @GetMapping("/user/real-estate-queries/{realEstateId}")
+    @PreAuthorize("hasRole('USER')")
 public ResponseEntity<List<QueryResponseLongDTO>> getQueriesForUser(@PathVariable Long realEstateId) {
     try {
         RealEstate realEstate = realEstateRepository.findById(realEstateId)
@@ -178,6 +183,7 @@ List<QueryResponseLongDTO> dtoList = queries.stream()
 
 
   @PatchMapping("/user/real-estate-queries/{id}")
+  @PreAuthorize("hasRole('USER')")
 public ResponseEntity<?> updateQuery(
         @PathVariable Long id,
         @RequestBody String response // direktno očekujemo String u body-u
@@ -234,6 +240,7 @@ public ResponseEntity<?> updateQuery(
 
 
     @PostMapping("/user/support-request")
+    @PreAuthorize("hasRole('USER')")
 public ResponseEntity<?> createSupportRequest(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody String question

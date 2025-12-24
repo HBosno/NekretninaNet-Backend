@@ -35,6 +35,7 @@ public class RealEstateController {
         this.userService = userService;
     }
 
+    // mogu svi pristupit, ukljucujuci neregistrovani korisnik, ne treba preauthorize anotacija
     @GetMapping
     public ResponseEntity<List<RealEstateDTO>> getRealEstates(
             @RequestParam(required = false) Double minPrice,
@@ -71,6 +72,7 @@ public class RealEstateController {
         }
     }
 
+    // isto ko gore za preauthorize
     @GetMapping("/{title}")
     public ResponseEntity<List<RealEstateDTO>> getRealEstatesByTitle(@PathVariable String title) {
         try {
@@ -96,6 +98,7 @@ public class RealEstateController {
     }
 
     @GetMapping("/user")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<RealEstateStatusDTO>> getRealEstatesByCurrentUser(
             @AuthenticationPrincipal UserDetails userDetails) {
         try {
@@ -124,6 +127,7 @@ public class RealEstateController {
         }
     }
 
+    // isto, spada u filtriranje i pregled nekretnina
     @GetMapping("/user/username/{username}")
     public ResponseEntity<List<RealEstateFullDTO>> getRealEstatesByUsername(@PathVariable String username) {
         try
@@ -154,8 +158,8 @@ public class RealEstateController {
     }
 }
 
-
     @PostMapping
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<RealEstateStatusDTO> createRealEstate(@Valid @RequestBody RealEstateCreateDTO dto,
                                                                 @AuthenticationPrincipal UserDetails userDetails) {
         try {
@@ -192,6 +196,7 @@ public class RealEstateController {
     }
 
    @PatchMapping("/{id}")
+   @PreAuthorize("hasRole('USER')")
 public ResponseEntity<RealEstateStatusDTO> updateRealEstatePartially(
         @PathVariable Long id,
         @Valid @RequestBody RealEstateUpdateDTO updates
@@ -252,6 +257,7 @@ public ResponseEntity<RealEstateStatusDTO> updateRealEstatePartially(
 
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> deleteRealEstate(@PathVariable Long id) {
         try {
             service.deleteRealEstateCascading(id);
