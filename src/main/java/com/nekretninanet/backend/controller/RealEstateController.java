@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -94,10 +95,12 @@ public class RealEstateController {
         }
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<RealEstateStatusDTO>> getRealEstatesByUserId(@PathVariable Long userId) {
+    @GetMapping("/user")
+    public ResponseEntity<List<RealEstateStatusDTO>> getRealEstatesByCurrentUser(
+            @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            List<RealEstate> estates = service.getByUserId(userId);
+            User user = userService.findByUsername(userDetails.getUsername());
+            List<RealEstate> estates = service.getByUserId(user.getId());
 
             if (estates.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -156,7 +159,7 @@ public class RealEstateController {
     public ResponseEntity<RealEstateStatusDTO> createRealEstate(@Valid @RequestBody RealEstateCreateDTO dto,
                                                                 @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            System.out.println("--------------ID trentnog usera: "+ userService.findByUsername(userDetails.getUsername()).getId());
+            User user = userService.findByUsername(userDetails.getUsername());
             RealEstate realEstate = new RealEstate();
             realEstate.setTitle(dto.getTitle());
             realEstate.setPrice(dto.getPrice());
@@ -166,11 +169,7 @@ public class RealEstateController {
             realEstate.setDescription(dto.getDescription());
             realEstate.setPublishDate(LocalDate.now());
             realEstate.setStatus(RealEstateStatus.ACTIVE); // enum
-
-            if (dto.getUserId() != null) {
-                User user = service.getUserById(dto.getUserId());
-                realEstate.setUser(user);
-            }
+            realEstate.setUser(user);
 
             RealEstate created = service.createRealEstate(realEstate);
 

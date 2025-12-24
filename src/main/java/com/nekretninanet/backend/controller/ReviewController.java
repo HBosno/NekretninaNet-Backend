@@ -6,6 +6,7 @@ import com.nekretninanet.backend.dto.ReviewRequestDTO;
 import com.nekretninanet.backend.model.Review;
 import com.nekretninanet.backend.model.ReviewStatus;
 import com.nekretninanet.backend.service.ReviewService;
+import com.nekretninanet.backend.service.UserService;
 import com.nekretninanet.backend.view.ReviewViews;
 import com.nekretninanet.backend.model.RealEstate;
 import com.nekretninanet.backend.model.User;
@@ -14,6 +15,8 @@ import com.nekretninanet.backend.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -24,15 +27,18 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final UserService userService;
     private final UserRepository userRepository;
     private final RealEstateRepository realEstateRepository;
 
     public ReviewController(
             ReviewService reviewService,
+            UserService userService,
             UserRepository userRepository,
             RealEstateRepository realEstateRepository
     ) {
         this.reviewService = reviewService;
+        this.userService = userService;
         this.userRepository = userRepository;
         this.realEstateRepository = realEstateRepository;
     }
@@ -55,15 +61,14 @@ public class ReviewController {
 
     /* ===================== USER ===================== */
 
-    @PostMapping("/user/review/{userId}/{realEstateId}")
+    @PostMapping("/user/review/{realEstateId}")
     public ResponseEntity<?> createReview(
-            @PathVariable Long userId,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long realEstateId,
             @Valid @RequestBody ReviewRequestDTO body
     ) {
         try {
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+            User user = userService.findByUsername(userDetails.getUsername());
 
             RealEstate realEstate = realEstateRepository.findById(realEstateId)
                     .orElseThrow(() -> new RuntimeException("Real estate not found"));

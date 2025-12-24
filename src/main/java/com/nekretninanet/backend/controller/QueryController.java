@@ -8,8 +8,11 @@ import com.nekretninanet.backend.dto.SupportRequestResponseDto;
 import com.nekretninanet.backend.model.*;
 import com.nekretninanet.backend.repository.QueryRepository;
 import com.nekretninanet.backend.service.QueryService;
+import com.nekretninanet.backend.service.UserService;
 import com.nekretninanet.backend.view.QueryViews;
 import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RestController;
 import com.nekretninanet.backend.model.Query;
 import com.nekretninanet.backend.model.QueryStatus;
@@ -32,15 +35,17 @@ import java.util.Collections;
 public class QueryController {
 
     private final QueryService queryService;
+    private final UserService userService;
     private final QueryRepository queryRepository;
     private final UserRepository userRepository;
     private final RealEstateRepository realEstateRepository;
 
-    public QueryController(QueryService queryService,
+    public QueryController(QueryService queryService, UserService userService,
                            UserRepository userRepository,
                            RealEstateRepository realEstateRepository,
                            QueryRepository queryRepository) {
         this.queryService = queryService;
+        this.userService = userService;
         this.userRepository = userRepository;
         this.realEstateRepository = realEstateRepository;
         this.queryRepository = queryRepository;
@@ -66,13 +71,15 @@ public class QueryController {
 
     /* ===================== USER ===================== */
 
-   @PostMapping("/user/real-estate-query/{realEstateId}/{userId}")
+   @PostMapping("/user/real-estate-query/{realEstateId}")
 public ResponseEntity<?> createRealEstateQuery(
         @PathVariable Long realEstateId,
-        @PathVariable Long userId,
+        @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody String question
 ) {
     try {
+        User user = userService.findByUsername(userDetails.getUsername());
+
         if (question == null || question.isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Question cannot be empty");
@@ -87,9 +94,6 @@ public ResponseEntity<?> createRealEstateQuery(
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Question contains invalid characters");
         }
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
         RealEstate realEstate = realEstateRepository.findById(realEstateId)
                 .orElseThrow(() -> new RuntimeException("RealEstate not found"));
@@ -229,12 +233,14 @@ public ResponseEntity<?> updateQuery(
 }
 
 
-    @PostMapping("/user/support-request/{userId}")
+    @PostMapping("/user/support-request")
 public ResponseEntity<?> createSupportRequest(
-        @PathVariable Long userId,
+        @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody String question
 ) {
     try {
+        User user = userService.findByUsername(userDetails.getUsername());
+
         if (question == null || question.isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Question is required");
@@ -249,8 +255,6 @@ public ResponseEntity<?> createSupportRequest(
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Question contains invalid characters");
         }
-
-        User user = queryService.getUserById(userId);
 
         Query query = new Query();
         query.setUser(user);

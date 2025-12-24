@@ -24,8 +24,6 @@ public class RealEstateCreateDTO {
     @Size(max = 550, message = "Description cannot exceed 550 characters")
     @Pattern(regexp = "^[A-Za-z0-9 ._?-]*$", message = "Description can contain letters, numbers, spaces, dot, question mark, dash, and underscore")
     private String description;
-    @NotNull(message = "User ID cannot be null")
-    private Long userId; // ID vlasnika
 
     // Konstruktor
     public RealEstateCreateDTO() {}
@@ -48,7 +46,4 @@ public class RealEstateCreateDTO {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
 }

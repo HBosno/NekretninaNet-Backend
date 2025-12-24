@@ -13,6 +13,7 @@ import com.nekretninanet.backend.repository.ReviewRepository;
 import com.nekretninanet.backend.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -323,7 +324,7 @@ public class UserService {
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username '" + username + "' not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User with username '" + username + "' not found"));
     }
 
 }
