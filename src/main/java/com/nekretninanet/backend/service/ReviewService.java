@@ -8,6 +8,7 @@ import com.nekretninanet.backend.model.ReviewStatus;
 import com.nekretninanet.backend.model.User;
 import com.nekretninanet.backend.model.ReviewStatus;
 import com.nekretninanet.backend.repository.ReviewRepository;
+import com.nekretninanet.backend.util.SanitizeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -55,6 +56,9 @@ public class ReviewService {
 }
 
     public Review saveReview(Review review) {
+        if (review.getComment() != null) {
+            review.setComment(SanitizeUtil.sanitize(review.getComment()));
+        }
         return reviewRepository.save(review);
     }
 

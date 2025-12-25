@@ -9,6 +9,7 @@ import com.nekretninanet.backend.model.*;
 import com.nekretninanet.backend.repository.QueryRepository;
 import com.nekretninanet.backend.service.QueryService;
 import com.nekretninanet.backend.service.UserService;
+import com.nekretninanet.backend.util.SanitizeUtil;
 import com.nekretninanet.backend.view.QueryViews;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -117,7 +118,7 @@ public ResponseEntity<?> createRealEstateQuery(
         Query newQuery = new Query();
         newQuery.setUser(user);
         newQuery.setRealEstate(realEstate);
-        newQuery.setQuestion(question);
+        newQuery.setQuestion(SanitizeUtil.sanitize(question));
         newQuery.setQueryDate(LocalDate.now());
         newQuery.setResponse(""); // default
         newQuery.setQueryType(QueryType.REAL_ESTATE_QUERY);
@@ -208,7 +209,7 @@ public ResponseEntity<?> updateQuery(
                         .body("Response contains invalid characters");
             }
 
-            query.setResponse(response);
+            query.setResponse(SanitizeUtil.sanitize(response));
             query.setStatus(QueryStatus.ANSWERED);
         }
 
@@ -265,7 +266,7 @@ public ResponseEntity<?> createSupportRequest(
 
         Query query = new Query();
         query.setUser(user);
-        query.setQuestion(question);
+        query.setQuestion(SanitizeUtil.sanitize(question));
         query.setQueryDate(LocalDate.now());
         query.setResponse(null); // default
         query.setQueryType(QueryType.SUPPORT_REQUEST);

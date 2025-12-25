@@ -11,6 +11,7 @@ import com.nekretninanet.backend.repository.QueryRepository;
 import com.nekretninanet.backend.repository.RealEstateRepository;
 import com.nekretninanet.backend.repository.ReviewRepository;
 import com.nekretninanet.backend.repository.UserRepository;
+import com.nekretninanet.backend.util.SanitizeUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,7 +25,8 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-
+    @Autowired
+    private AuditLogService auditLogService;
     @Autowired
     private ReviewRepository reviewRepository;
     @Autowired
@@ -46,8 +48,8 @@ public class UserService {
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
-        user.setFirstName(dto.getFirstName());
-        user.setLastName(dto.getLastName());
+        user.setFirstName(SanitizeUtil.sanitize(dto.getFirstName()));
+        user.setLastName(SanitizeUtil.sanitize(dto.getLastName()));
 
         user.setHashPassword(passwordEncoder.encode(dto.getPassword()));
         user.setUserType(UserType.USER);
@@ -132,11 +134,11 @@ public class UserService {
         String hashedPassword = passwordEncoder.encode(req.getPassword());
 
         User user = new User(
-                req.getFirstName(),
-                req.getLastName(),
+                SanitizeUtil.sanitize(req.getFirstName()),
+                SanitizeUtil.sanitize(req.getLastName()),
                 req.getUsername(),
                 hashedPassword,
-                req.getAddress(),
+                SanitizeUtil.sanitize(req.getAddress()),
                 req.getEmail(),
                 req.getPhoneNumber(),
                 UserType.SUPPORT
@@ -150,7 +152,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateSupportUser(Long id, UpdateUserDTO dto) {
+    public User updateSupportUser(Long id, Long adminId, UpdateUserDTO dto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Support user not found"));
 
@@ -179,9 +181,18 @@ public class UserService {
             throw new BadRequestException("Phone number already in use");
         }
 
-        if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());
-        if (dto.getLastName() != null) user.setLastName(dto.getLastName());
-        if (dto.getAddress() != null) user.setAddress(dto.getAddress());
+        if (dto.getFirstName() != null) {
+            user.setFirstName(SanitizeUtil.sanitize(dto.getFirstName()));
+        }
+
+        if (dto.getLastName() != null) {
+            user.setLastName(SanitizeUtil.sanitize(dto.getLastName()));
+        }
+
+        if (dto.getAddress() != null) {
+            user.setAddress(SanitizeUtil.sanitize(dto.getAddress()));
+        }
+        if (dto.getUsername() != null) user.setUsername(dto.getUsername());
         if (dto.getEmail() != null) user.setEmail(dto.getEmail());
         if (dto.getPhoneNumber() != null) user.setPhoneNumber(dto.getPhoneNumber());
 
@@ -190,7 +201,14 @@ public class UserService {
             user.setHashPassword(passwordEncoder.encode(dto.getPassword()));
         }
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        auditLogService.logAdminUpdateSupportUser(
+                adminId,
+                user.getUsername()
+        );
+
+        return savedUser;
     }
 
     public User updateRegularUser(Long id, UpdateUserDTO dto) {
@@ -222,10 +240,18 @@ public class UserService {
             throw new BadRequestException("Phone number already in use");
         }
 
-        if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());
-        if (dto.getLastName() != null) user.setLastName(dto.getLastName());
+        if (dto.getFirstName() != null) {
+            user.setFirstName(SanitizeUtil.sanitize(dto.getFirstName()));
+        }
+
+        if (dto.getLastName() != null) {
+            user.setLastName(SanitizeUtil.sanitize(dto.getLastName()));
+        }
+
+        if (dto.getAddress() != null) {
+            user.setAddress(SanitizeUtil.sanitize(dto.getAddress()));
+        }
         if (dto.getUsername() != null) user.setUsername(dto.getUsername());
-        if (dto.getAddress() != null) user.setAddress(dto.getAddress());
         if (dto.getEmail() != null) user.setEmail(dto.getEmail());
         if (dto.getPhoneNumber() != null) user.setPhoneNumber(dto.getPhoneNumber());
         if (dto.getPassword() != null) {
