@@ -5,6 +5,7 @@ import com.nekretninanet.backend.model.*;
 import com.nekretninanet.backend.repository.QueryRepository;
 import com.nekretninanet.backend.repository.RealEstateRepository;
 import com.nekretninanet.backend.repository.UserRepository;
+import com.nekretninanet.backend.util.SanitizeUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +50,7 @@ public class QueryService {
             throw new IllegalArgumentException("Query is not a support request");
         }
 
-        query.setResponse(response);
+        query.setResponse(SanitizeUtil.sanitize(response));
         query.setStatus(QueryStatus.ANSWERED);
 
         return queryRepository.save(query);

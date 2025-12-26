@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nekretninanet.backend.view.UserViews;
@@ -48,8 +50,10 @@ public class UserController {
     @JsonView(UserViews.SupportAccountSummary.class)
     public ResponseEntity<User> updateSupportAccount(
             @PathVariable Long id,
-            @RequestBody @Valid UpdateUserDTO dto) {
-        User updatedUser = userService.updateSupportUser(id, dto);
+            @RequestBody @Valid UpdateUserDTO dto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long adminId = userService.findByUsername(userDetails.getUsername()).getId();
+        User updatedUser = userService.updateSupportUser(id, adminId, dto);
         return ResponseEntity.ok(updatedUser);
     }
 

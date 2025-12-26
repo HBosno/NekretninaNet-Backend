@@ -5,6 +5,7 @@ import com.nekretninanet.backend.repository.QueryRepository;
 import com.nekretninanet.backend.repository.RealEstateRepository;
 import com.nekretninanet.backend.repository.ReviewRepository;
 import com.nekretninanet.backend.repository.UserRepository;
+import com.nekretninanet.backend.util.SanitizeUtil;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -67,6 +68,11 @@ public class RealEstateService {
 
     // Kreiranje nove nekretnine
     public RealEstate createRealEstate(RealEstate realEstate) {
+
+        realEstate.setTitle(SanitizeUtil.sanitize(realEstate.getTitle()));
+        realEstate.setLocation(SanitizeUtil.sanitize(realEstate.getLocation()));
+        realEstate.setDescription(SanitizeUtil.sanitize(realEstate.getDescription()));
+
         realEstate.setPublishDate(LocalDate.now());
         realEstate.setStatus(RealEstateStatus.ACTIVE);
         return realEstateRepository.save(realEstate);
@@ -84,12 +90,12 @@ public class RealEstateService {
     public RealEstate updateRealEstatePartial(RealEstate updates) {
         RealEstate existing = getRealEstateById(updates.getId());
 
-        if (updates.getTitle() != null) existing.setTitle(updates.getTitle());
+        if (updates.getTitle() != null) existing.setTitle(SanitizeUtil.sanitize(updates.getTitle()));
         if (updates.getPrice() != null) existing.setPrice(updates.getPrice());
-        if (updates.getLocation() != null) existing.setLocation(updates.getLocation());
+        if (updates.getLocation() != null) existing.setLocation(SanitizeUtil.sanitize(updates.getLocation()));
         if (updates.getArea() != null) existing.setArea(updates.getArea());
         if (updates.getYearBuilt() != null) existing.setYearBuilt(updates.getYearBuilt());
-        if (updates.getDescription() != null) existing.setDescription(updates.getDescription());
+        if (updates.getDescription() != null) existing.setDescription(SanitizeUtil.sanitize(updates.getDescription()));
         if (updates.getStatus() != null) existing.setStatus(updates.getStatus());
 
         return realEstateRepository.save(existing);
