@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -45,11 +46,16 @@ public class UserService {
             throw new BadRequestException("Email already exists");
         }
 
+        validatePassword(dto.getPassword());
+
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setFirstName(SanitizeUtil.sanitize(dto.getFirstName()));
         user.setLastName(SanitizeUtil.sanitize(dto.getLastName()));
+
+        user.setAddress(SanitizeUtil.sanitize(dto.getAddress()));
+        user.setPhoneNumber(dto.getPhoneNumber());
 
         user.setHashPassword(passwordEncoder.encode(dto.getPassword()));
         user.setUserType(UserType.USER);
@@ -71,8 +77,8 @@ public class UserService {
     public List<User> getAllSupportUsers() {
         List<User> supportUsers = userRepository.findByUserType(UserType.SUPPORT);
 
-        if (supportUsers == null || supportUsers.isEmpty()) {
-            throw new ResourceNotFoundException("No support accounts found.");
+        if (supportUsers == null) {
+            return new ArrayList<>();
         }
 
         return supportUsers;
@@ -81,8 +87,8 @@ public class UserService {
     public List<User> getAllRegularUsers() {
         List<User> regularUsers = userRepository.findByUserType(UserType.USER);
 
-        if (regularUsers == null || regularUsers.isEmpty()) {
-            throw new ResourceNotFoundException("No regular users found.");
+        if (regularUsers == null) {
+            return new ArrayList<>();
         }
 
         return regularUsers;

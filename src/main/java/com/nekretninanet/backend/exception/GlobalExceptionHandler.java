@@ -88,9 +88,12 @@ public class GlobalExceptionHandler {
                 .body("Pristup odbijen: Nemate dozvolu za rad sa ovim resursom (IDOR zaštita).");
     }
 
+    /*
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Došlo je do interne greške na serveru.");
     }
+
+     */
 }

@@ -39,6 +39,7 @@ public class AuthController {
     }
 
 
+    @PreAuthorize("isAnonymous()")
     @PostMapping("/auth/register")
     public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequestDto dto) {
         userService.register(dto);
@@ -90,6 +91,7 @@ public class AuthController {
         return ResponseEntity.ok(new LoginResponseDto(null, user.getUsername(), user.getUserType().name()));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/auth/logout")
     public ResponseEntity<Void> logout(Authentication auth, HttpServletResponse response) {
         if (auth != null) {

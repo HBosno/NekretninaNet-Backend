@@ -15,22 +15,28 @@ public class UpdateUserDTO {
     @Size(max = 50, message = "First name cannot exceed 50 characters")
     @Pattern(regexp = "^[A-Za-zČĆŽŠĐčćžšđ -]+$", message = "First name can contain only letters, spaces, and dashes")
     private String firstName;
+
     @Size(max = 50, message = "Last name cannot exceed 50 characters")
     @Pattern(regexp = "^[A-Za-zČĆŽŠĐčćžšđ -]+$", message = "Last name can contain only letters, spaces, and dashes")
     private String lastName;
+
     @Size(min = 4, max = 15, message = "Username must be between 4 and 15 characters")
     @Pattern(
             regexp = "^[A-Za-z0-9._]+$",
             message = "Username can contain only letters, numbers, dot and underscore"
     )
     private String username;
+
     @Size(min = 12, max = 100, message = "Password must be between 12 and 100 characters")
     private String password;
+
     @Size(max = 100, message = "Address cannot exceed 100 characters")
     private String address;
+
     @Email(message = "Email must be valid")
     @Size(max = 50, message = "Email cannot exceed 50 characters")
     private String email;
+
     @Pattern(
             regexp = "^\\d{3}-\\d{3}-\\d{3}$",
             message = "Phone number format must be XXX-XXX-XXX"
