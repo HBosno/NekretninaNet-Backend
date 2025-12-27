@@ -94,11 +94,11 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/user/account/{id}")
+    @GetMapping("/user/account")
     @PreAuthorize("hasRole('USER')")
     @JsonView(UserViews.RegularUserSummary.class)
-    public ResponseEntity<User> getRegularUserById(@PathVariable Long id) {
-        User user = userService.getRegularUserById(id);
+    public ResponseEntity<User> getRegularUserById(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.findByUsername(userDetails.getUsername());
         return ResponseEntity.ok(user);
     }
 
@@ -107,20 +107,22 @@ public class UserController {
         gore SUPPORT, ovdje USER. taj dio se negdje drugo obezbjedjuje. spring security?/ autentikacija i autorizacija,
         role based access
     */
-    @PatchMapping("/user/account/{id}")
+    @PatchMapping("/user/account")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<User> updateRegularUserByRegular(
-            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody UpdateUserDTO dto) {
-        userService.updateRegularUser(id, dto);
+        User user = userService.findByUsername(userDetails.getUsername());
+        userService.updateRegularUser(user.getId(), dto);
         return ResponseEntity.noContent().build();
     }
 
     // analogno kao za prethodni endpoint. vec postoji identicna logika za delete /support/regular-users-accounts/{username}
-    @DeleteMapping("/user/account/{id}")
+    @DeleteMapping("/user/account")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> deleteRegularUserByRegular(@PathVariable Long id) {
-        userService.deleteRegularUserCascading(id);
+    public ResponseEntity<Void> deleteRegularUserByRegular(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.findByUsername(userDetails.getUsername());
+        userService.deleteRegularUserCascading(user.getId());
         return ResponseEntity.ok().build();
     }
 
