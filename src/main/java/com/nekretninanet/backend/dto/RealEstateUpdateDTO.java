@@ -4,13 +4,13 @@ import jakarta.validation.constraints.*;
 
 public class RealEstateUpdateDTO {
     @Size(max = 100, message = "Title cannot be longer than 100 characters")
-    @Pattern(regexp = "^[A-Za-z0-9 ]*$", message = "Title can only contain letters, numbers and spaces")
+    @Pattern(regexp = "^[A-Za-z0-9 čćžšđČĆŽŠĐ]+$", message = "Title can contain letters, numbers, and spaces")
     private String title;
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be positive")
     @DecimalMax(value = "1000000000", message = "Price is too high")
     private Double price;
     @Size(max = 50, message = "Location cannot be longer than 50 characters")
-    @Pattern(regexp = "^[A-Za-z0-9. ]*$", message = "Location can only contain letters, numbers, spaces and dots")
+    @Pattern(regexp = "^[A-Za-z0-9. čćžšđČĆŽŠĐ]+$", message = "Location can contain letters, numbers, spaces and dots")
     private String location;
     @DecimalMin(value = "0.0", inclusive = false, message = "Area must be positive")
     @DecimalMax(value = "1000000", message = "Area is too large")
@@ -19,7 +19,7 @@ public class RealEstateUpdateDTO {
     @Max(value = 9999, message = "Year built is invalid")
     private Integer yearBuilt;
     @Size(max = 550, message = "Description cannot be longer than 550 characters")
-    @Pattern(regexp = "^[A-Za-z0-9 ._\\-?]*$", message = "Description contains invalid characters")
+    @Pattern(regexp = "^[A-Za-z0-9 .,!?\\-()čćžšđČĆŽŠĐ]*$", message = "Description contains invalid characters")
     private String description;
     @Pattern(regexp = "ACTIVE|INACTIVE", message = "Status is invalid")
     private String status;

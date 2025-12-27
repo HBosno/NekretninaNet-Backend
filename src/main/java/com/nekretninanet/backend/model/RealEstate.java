@@ -18,7 +18,7 @@ public class RealEstate {
     @Column(nullable = false, length = 100)
     @NotBlank(message = "Title cannot be blank")
     @Size(max = 100, message = "Title can have max 100 characters")
-    @Pattern(regexp = "^[A-Za-z0-9 ]+$", message = "Title can contain only letters, numbers, and spaces")
+    @Pattern(regexp = "^[A-Za-z0-9 čćžšđČĆŽŠĐ]+$", message = "Title can contain letters, numbers, and spaces")
     private String title;
     @NotNull(message = "Price cannot be null")
     @Positive(message = "Price must be positive")
@@ -27,7 +27,7 @@ public class RealEstate {
     private Double price;
     @NotBlank(message = "Location cannot be blank")
     @Size(max = 50, message = "Location can have max 50 characters")
-    @Pattern(regexp = "^[A-Za-z0-9. ]+$", message = "Location can contain only letters, numbers, spaces and dots")
+    @Pattern(regexp = "^[A-Za-z0-9. čćžšđČĆŽŠĐ]+$", message = "Location can contain letters, numbers, spaces and dots")
     private String location;
     @Positive(message = "Area must be positive")
     @Max(value = 10_000, message = "Area is too large")
@@ -37,7 +37,7 @@ public class RealEstate {
     @Column(name = "year_built")
     private Integer yearBuilt;
     @Size(max = 550, message = "Description can have max 550 characters")
-    @Pattern(regexp = "^[A-Za-z0-9 ._?-]*$", message = "Description can contain letters, numbers, spaces, dot, question mark, dash, and underscore")
+    @Pattern(regexp = "^[A-Za-z0-9 .,!?\\-()čćžšđČĆŽŠĐ]*$", message = "Description contains invalid characters")
     private String description;
 
     @NotNull(message = "Publish date cannot be null")

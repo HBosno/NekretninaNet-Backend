@@ -124,6 +124,17 @@ public class UserCommandLineRunner implements CommandLineRunner {
         user.setUsername("user");
         userRepository.save(user);
 
+        User user2 = new User();
+        user2.setFirstName("ImeUseraDrugog");
+        user2.setLastName("PrezimeUseraDrugog");
+        user2.setEmail("user2@mail.com");
+        user2.setUserType(UserType.USER);
+        user2.setAddress("adresa 213");
+        user2.setHashPassword(passwordEncoder.encode("Sifrazausera2"));
+        user2.setPhoneNumber("751-112-479");
+        user2.setUsername("user2");
+        userRepository.save(user2);
+
 
     }
 

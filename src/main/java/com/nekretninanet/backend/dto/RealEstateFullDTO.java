@@ -13,20 +13,15 @@ public class RealEstateFullDTO {
     private String description;
     private LocalDate publishDate;
     private String status;
+    private String ownerUsername;
 
     public RealEstateFullDTO() {
     }
 
     public RealEstateFullDTO(
-            Long id,
-            String title,
-            Double price,
-            String location,
-            Double area,
-            Integer yearBuilt,
-            String description,
-            LocalDate publishDate,
-            String status
+            Long id, String title, Double price, String location,
+            Double area, Integer yearBuilt, String description,
+            LocalDate publishDate, String status, String ownerUsername
     ) {
         this.id = id;
         this.title = title;
@@ -37,6 +32,7 @@ public class RealEstateFullDTO {
         this.description = description;
         this.publishDate = publishDate;
         this.status = status;
+        this.ownerUsername = ownerUsername;
     }
 
     // ===== GETTERS =====
@@ -77,6 +73,10 @@ public class RealEstateFullDTO {
         return status;
     }
 
+    public String getOwnerUsername() {
+        return ownerUsername;
+    }
+
     // ===== SETTERS =====
 
     public void setId(Long id) {
@@ -113,5 +113,9 @@ public class RealEstateFullDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public void setOwnerUsername(String ownerUsername) {
+        this.ownerUsername = ownerUsername;
     }
 }
