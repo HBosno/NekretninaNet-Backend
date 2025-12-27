@@ -62,6 +62,7 @@ public class QueryController {
         List<Query> requests = queryService.getAllSupportRequests();
         return ResponseEntity.ok(requests);
     }
+
     @JsonView(QueryViews.SupportRequestResponseSummary.class)
     @PatchMapping("/support/request/{id}")
     @PreAuthorize("hasRole('SUPPORT')")

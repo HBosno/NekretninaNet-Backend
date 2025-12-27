@@ -3,10 +3,7 @@ package com.nekretninanet.backend.model;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nekretninanet.backend.view.QueryViews;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 
@@ -18,8 +15,10 @@ public class Query {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonView({QueryViews.SupportRequestSummary.class, QueryViews.SupportRequestResponseSummary.class})
     private Long id;
+
     @NotNull(message = "Query date cannot be null")
-    @FutureOrPresent(message = "Query date cannot be in the past")
+    //@FutureOrPresent(message = "Query date cannot be in the past")
+    @PastOrPresent(message = "Query date must be in the past or present")
     @Column(name = "query_date")
     @JsonView(QueryViews.SupportRequestSummary.class)
     private LocalDate queryDate;
