@@ -158,6 +158,30 @@ public class RealEstateController {
     }
 }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<RealEstateFullDTO> getRealEstateById(@PathVariable Long id) {
+        try {
+            RealEstate e = service.getRealEstateById(id);
+
+            RealEstateFullDTO dto = new RealEstateFullDTO(
+                    e.getId(),
+                    e.getTitle(),
+                    e.getPrice(),
+                    e.getLocation(),
+                    e.getArea(),
+                    e.getYearBuilt(),
+                    e.getDescription(),
+                    e.getPublishDate(),
+                    e.getStatus().name()
+            );
+
+            return ResponseEntity.ok(dto);
+
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<RealEstateStatusDTO> createRealEstate(@Valid @RequestBody RealEstateCreateDTO dto,
