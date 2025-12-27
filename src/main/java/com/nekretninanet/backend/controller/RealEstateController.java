@@ -52,10 +52,6 @@ public class RealEstateController {
                 result = service.filterRealEstates(minPrice, maxPrice, location, yearBuilt);
             }
 
-            if (result.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
-
             List<RealEstateDTO> dtoList = result.stream()
                     .map(r -> new RealEstateDTO(
                             r.getId(),
@@ -157,6 +153,30 @@ public class RealEstateController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<RealEstateFullDTO> getRealEstateById(@PathVariable Long id) {
+        try {
+            RealEstate e = service.getRealEstateById(id);
+
+            RealEstateFullDTO dto = new RealEstateFullDTO(
+                    e.getId(),
+                    e.getTitle(),
+                    e.getPrice(),
+                    e.getLocation(),
+                    e.getArea(),
+                    e.getYearBuilt(),
+                    e.getDescription(),
+                    e.getPublishDate(),
+                    e.getStatus().name()
+            );
+
+            return ResponseEntity.ok(dto);
+
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
