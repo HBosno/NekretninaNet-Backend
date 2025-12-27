@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -34,8 +35,8 @@ public class QueryService {
     public List<Query> getAllSupportRequests() {
         List<Query> requests = queryRepository.findByQueryType(QueryType.SUPPORT_REQUEST);
 
-        if (requests == null || requests.isEmpty()) {
-            throw new ResourceNotFoundException("No support requests found.");
+        if (requests == null) {
+            return new ArrayList<>();
         }
 
         return requests;

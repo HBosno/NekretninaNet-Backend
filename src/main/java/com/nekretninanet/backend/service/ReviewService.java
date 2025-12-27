@@ -11,6 +11,8 @@ import com.nekretninanet.backend.repository.ReviewRepository;
 import com.nekretninanet.backend.util.SanitizeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.Optional;
 
 import java.time.LocalDate;
@@ -36,8 +38,8 @@ public class ReviewService {
 
     public List<Review> getReviewsByUsername(String username) {
         List<Review> reviews = reviewRepository.findByUserUsername(username);
-        if (reviews.isEmpty()) {
-            throw new ResourceNotFoundException("No reviews found for user: " + username);
+        if (reviews == null) {
+            return new ArrayList<>();
         }
         return reviews;
     }

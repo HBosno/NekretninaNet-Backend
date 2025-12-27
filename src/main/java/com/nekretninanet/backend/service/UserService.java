@@ -87,8 +87,8 @@ public class UserService {
     public List<User> getAllRegularUsers() {
         List<User> regularUsers = userRepository.findByUserType(UserType.USER);
 
-        if (regularUsers == null || regularUsers.isEmpty()) {
-            throw new ResourceNotFoundException("No regular users found.");
+        if (regularUsers == null) {
+            return new ArrayList<>();
         }
 
         return regularUsers;
