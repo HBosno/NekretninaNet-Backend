@@ -52,7 +52,7 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/h2-console/**", "/auth/register", "/auth/login")
+                        .ignoringRequestMatchers("/h2-console/**", "/auth/register", "/auth/login", "/real-estates/**")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(requestHandler)
                 )
@@ -65,6 +65,8 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/h2-console/**").permitAll()
                         .requestMatchers("/auth/register", "/auth/login").permitAll()
+                        // ZA JAVNI PRISTUP NEKRETNINAMA:
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/real-estates/**").permitAll()
                         .anyRequest().authenticated()
                 )
 
