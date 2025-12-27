@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -76,8 +77,8 @@ public class UserService {
     public List<User> getAllSupportUsers() {
         List<User> supportUsers = userRepository.findByUserType(UserType.SUPPORT);
 
-        if (supportUsers == null || supportUsers.isEmpty()) {
-            throw new ResourceNotFoundException("No support accounts found.");
+        if (supportUsers == null) {
+            return new ArrayList<>();
         }
 
         return supportUsers;

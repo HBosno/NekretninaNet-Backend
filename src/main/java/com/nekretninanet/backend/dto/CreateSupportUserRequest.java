@@ -34,6 +34,7 @@ public class CreateSupportUserRequest {
     @NotBlank(message = "Password cannot be blank")
     @Size(min = 12, max = 100, message = "Password must be between 12 and 100 characters")
     private String password;
+
     @Size(max = 100, message = "Address cannot exceed 100 characters")
     private String address;
 
@@ -41,8 +42,9 @@ public class CreateSupportUserRequest {
     @Email(message = "Email must be valid")
     @Size(max = 50, message = "Email cannot exceed 50 characters")
     private String email;
+
     @Pattern(
-            regexp = "^\\d{3}-\\d{3}-\\d{3}$",
+            regexp = "^(|\\d{3}-\\d{3}-\\d{3})$",
             message = "Phone number format must be XXX-XXX-XXX"
     )
     private String phoneNumber;

@@ -40,16 +40,18 @@ public class User {
             regexp = "^[A-Za-z0-9._]+$",
             message = "Username can contain only letters, numbers, dot and underscore"
     )
-    @JsonView({UserViews.RegularUserSummary.class, QueryViews.SupportRequestSummary.class, ReviewViews.SupportReviewSummary.class})
+    @JsonView({UserViews.SupportAccountSummary.class, UserViews.RegularUserSummary.class, QueryViews.SupportRequestSummary.class, ReviewViews.SupportReviewSummary.class})
     private String username;
 
     @Column(name = "hash_password", nullable = false)
     @NotBlank(message = "Password cannot be blank")
     private String hashPassword;
+
     @Column(length = 100)
     @Size(max = 100, message = "Address cannot exceed 100 characters")
     @JsonView(UserViews.RegularUserSummary.class)
     private String address;
+
     @Column(nullable = false, unique = true, length = 50)
     @NotBlank(message = "Email cannot be blank")
     @Email(message = "Email must be valid")
