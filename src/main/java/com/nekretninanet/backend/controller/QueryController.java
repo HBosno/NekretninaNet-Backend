@@ -150,38 +150,47 @@ public ResponseEntity<?> createRealEstateQuery(
 
     @GetMapping("/user/real-estate-queries/{realEstateId}")
     @PreAuthorize("hasRole('USER')")
-public ResponseEntity<List<QueryResponseLongDTO>> getQueriesForUser(@PathVariable Long realEstateId) {
-    try {
-        RealEstate realEstate = realEstateRepository.findById(realEstateId)
-                .orElseThrow(() -> new RuntimeException("Real estate not found"));
+    public ResponseEntity<List<QueryResponseLongDTO>> getQueriesForUser(
+            @PathVariable Long realEstateId,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        try {
+            User currentUser = userService.findByUsername(userDetails.getUsername());
+            RealEstate realEstate = realEstateRepository.findById(realEstateId)
+                    .orElseThrow(() -> new RuntimeException("Real estate not found"));
 
-        List<Query> queries = queryRepository.findByRealEstateAndStatusNot(realEstate, QueryStatus.REMOVED);
+            List<Query> queries;
 
-        if (queries.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            if (realEstate.getUser().getId().equals(currentUser.getId())) {
+                // Ako je vlasnik, daj mu sve upite za njegovu nekretninu
+                queries = queryRepository.findByRealEstateAndStatusNot(realEstate, QueryStatus.REMOVED);
+            } else {
+                queries = queryRepository.findByRealEstateAndUserAndStatusNot(realEstate, currentUser, QueryStatus.REMOVED);
+            }
+
+            if (queries.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            }
+
+            List<QueryResponseLongDTO> dtoList = queries.stream()
+                    .map(q -> new QueryResponseLongDTO(
+                            q.getId(),
+                            q.getQueryDate(),
+                            q.getQuestion(),
+                            q.getResponse(),
+                            q.getQueryType().name(),
+                            q.getStatus().name(),
+                            q.getUser().getId(),
+                            q.getUser().getUsername()
+                    ))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(dtoList);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
         }
-
-List<QueryResponseLongDTO> dtoList = queries.stream()
-        .map(q -> new QueryResponseLongDTO(
-                q.getId(),                // Long id
-                q.getQueryDate(),         // LocalDate queryDate
-                q.getQuestion(),          // String question
-                q.getResponse(),          // String response
-                q.getQueryType().name(),  // String queryType
-                q.getStatus().name(),     // String status
-                q.getUser().getId(),      // Long userId
-                q.getUser().getUsername() // String username
-        ))
-        .collect(Collectors.toList());
-
-        return ResponseEntity.ok(dtoList);
-
-    } catch (RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
     }
-}
 
 
   @PatchMapping("/user/real-estate-queries/{id}")

@@ -69,7 +69,7 @@ public class RealEstateController {
     }
 
     // isto ko gore za preauthorize
-    @GetMapping("/{title}")
+    @GetMapping("/search/{title}")
     public ResponseEntity<List<RealEstateDTO>> getRealEstatesByTitle(@PathVariable String title) {
         try {
             List<RealEstate> estates = service.getRealEstatesByTitle(title);
@@ -101,10 +101,6 @@ public class RealEstateController {
             User user = userService.findByUsername(userDetails.getUsername());
             List<RealEstate> estates = service.getByUserId(user.getId());
 
-            if (estates.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-            }
-
             List<RealEstateStatusDTO> dtoList = estates.stream()
                     .map(e -> new RealEstateStatusDTO(
                             e.getId(),
@@ -123,6 +119,7 @@ public class RealEstateController {
         }
     }
 
+    /*
     // isto, spada u filtriranje i pregled nekretnina
     @GetMapping("/user/username/{username}")
     public ResponseEntity<List<RealEstateFullDTO>> getRealEstatesByUsername(@PathVariable String username) {
@@ -144,7 +141,8 @@ public class RealEstateController {
                         e.getYearBuilt(),
                         e.getDescription(),
                         e.getPublishDate(),
-                        e.getStatus().name()
+                        e.getStatus().name(),
+                        e.getUser().getUsername()
                 ))
                 .toList();
             return ResponseEntity.ok(dtoList);
@@ -153,6 +151,8 @@ public class RealEstateController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 }
+*/
+
 
     @GetMapping("/{id}")
     public ResponseEntity<RealEstateFullDTO> getRealEstateById(@PathVariable Long id) {
@@ -168,7 +168,8 @@ public class RealEstateController {
                     e.getYearBuilt(),
                     e.getDescription(),
                     e.getPublishDate(),
-                    e.getStatus().name()
+                    e.getStatus().name(),
+                    e.getUser().getUsername()
             );
 
             return ResponseEntity.ok(dto);
