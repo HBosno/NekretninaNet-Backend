@@ -52,10 +52,6 @@ public class RealEstateController {
                 result = service.filterRealEstates(minPrice, maxPrice, location, yearBuilt);
             }
 
-            if (result.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
-
             List<RealEstateDTO> dtoList = result.stream()
                     .map(r -> new RealEstateDTO(
                             r.getId(),
