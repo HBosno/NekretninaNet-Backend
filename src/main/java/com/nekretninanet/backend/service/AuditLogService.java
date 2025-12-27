@@ -5,6 +5,7 @@ import com.nekretninanet.backend.repository.AuditLogRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class AuditLogService {
@@ -22,5 +23,9 @@ public class AuditLogService {
         auditLog.setTimestamp(LocalDateTime.now());
 
         auditLogRepository.save(auditLog);
+    }
+
+    public List<AuditLog> getAllAuditLogs() {
+        return auditLogRepository.findAll();
     }
 }

@@ -4,7 +4,9 @@ import com.nekretninanet.backend.dto.CreateSupportUserRequest;
 import com.nekretninanet.backend.dto.LoginRequestDto;
 import com.nekretninanet.backend.dto.RegisterRequestDto;
 import com.nekretninanet.backend.dto.UpdateUserDTO;
+import com.nekretninanet.backend.model.AuditLog;
 import com.nekretninanet.backend.model.User;
+import com.nekretninanet.backend.service.AuditLogService;
 import com.nekretninanet.backend.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -23,9 +25,12 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final AuditLogService auditLogService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, AuditLogService auditLogService) {
+
         this.userService = userService;
+        this.auditLogService = auditLogService;
     }
 
 
@@ -117,5 +122,17 @@ public class UserController {
     public ResponseEntity<Void> deleteRegularUserByRegular(@PathVariable Long id) {
         userService.deleteRegularUserCascading(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/admin/log")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<AuditLog>> getAllAuditLogs() {
+        List<AuditLog> logs = auditLogService.getAllAuditLogs();
+
+        if (logs.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(logs);
     }
 }
