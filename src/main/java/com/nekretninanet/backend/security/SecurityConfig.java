@@ -2,6 +2,7 @@ package com.nekretninanet.backend.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -31,65 +32,74 @@ public class SecurityConfig {
     }
 
     @Bean
-public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtFilter) throws Exception {
+    @Order(1)
+    public SecurityFilterChain h2FilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher(org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console())
+                .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 
-    // CSRF handler
-    CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
-    requestHandler.setCsrfRequestAttributeName(null);
+        return http.build();
+    }
 
-    http
-        .csrf(csrf -> csrf
-            .ignoringRequestMatchers("/h2-console/**", "/auth/register", "/auth/login")
-            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-            .csrfTokenRequestHandler(requestHandler)
-        )
-        .cors(org.springframework.security.config.Customizer.withDefaults())
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-                "/v3/api-docs/**",
-                "/swagger/**",
-                "/swagger-ui/**",
-                "/swagger-ui.html",
-                "/h2-console/**"
-            ).permitAll()
-            .requestMatchers("/auth/register", "/auth/login").permitAll()
-            .anyRequest().authenticated()
-        )
+    @Bean
+    @Order(2)
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtFilter) throws Exception {
+        // CSRF handler
+        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+        requestHandler.setCsrfRequestAttributeName(null);
 
-        // ===== HEADERS (POSTOJEĆE + DODATO) =====
-        .headers(headers -> headers
-            // Postojeće – potrebno za H2 konzolu
-            .frameOptions(frameOptions -> frameOptions.disable())
-
-            // ===== CSP =====
-            .contentSecurityPolicy(csp -> csp
-                .policyDirectives(
-                    "default-src 'self'; " +
-                    "script-src 'self'; " +
-                    "style-src 'self' 'unsafe-inline'; " +
-                    "img-src 'self' data:;"
+        http
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/h2-console/**", "/auth/register", "/auth/login")
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRequestHandler(requestHandler)
                 )
-            )
+                .cors(org.springframework.security.config.Customizer.withDefaults())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/v3/api-docs/**",
+                                "/swagger/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/h2-console/**").permitAll()
+                        .requestMatchers("/auth/register", "/auth/login").permitAll()
+                        .anyRequest().authenticated()
+                )
 
-            // ===== XSS Protection =====
-            .xssProtection(xss -> xss.headerValue(
-                org.springframework.security.web.header.writers.XXssProtectionHeaderWriter
-                    .HeaderValue.ENABLED_MODE_BLOCK
-            ))
+                // ===== HEADERS (POSTOJEĆE + DODATO) =====
+                .headers(headers -> headers
+                        // Postojeće – potrebno za H2 konzolu
+                        .frameOptions(frameOptions -> frameOptions.disable())
 
-            // ===== DODATNI SIGURNOSNI HEADERI =====
-            .contentTypeOptions(org.springframework.security.config.Customizer.withDefaults()) // X-Content-Type-Options: nosniff
-            .httpStrictTransportSecurity(hsts -> hsts
-                .includeSubDomains(true)
-                .maxAgeInSeconds(31536000)
-            )
-        )
+                        // ===== CSP =====
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives("default-src 'self'; " +
+                                                "script-src 'self'; " +
+                                                "style-src 'self' 'unsafe-inline'; " +
+                                                "img-src 'self' data:;"
+                                )
+                        )
 
-        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                        // ===== XSS Protection =====
+                        .xssProtection(xss -> xss.headerValue(
+                                org.springframework.security.web.header.writers.XXssProtectionHeaderWriter
+                                        .HeaderValue.ENABLED_MODE_BLOCK)
+                        )
 
-    return http.build();
-}
+                        // ===== DODATNI SIGURNOSNI HEADERI =====
+                        .contentTypeOptions(org.springframework.security.config.Customizer.withDefaults()) // X-Content-Type-Options: nosniff
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(31536000)
+                        )
+                )
+
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
 
 }
 

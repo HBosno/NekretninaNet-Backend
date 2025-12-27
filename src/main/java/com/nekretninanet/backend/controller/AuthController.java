@@ -39,6 +39,7 @@ public class AuthController {
     }
 
 
+    @PreAuthorize("isAnonymous()")
     @PostMapping("/auth/register")
     public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequestDto dto) {
         userService.register(dto);

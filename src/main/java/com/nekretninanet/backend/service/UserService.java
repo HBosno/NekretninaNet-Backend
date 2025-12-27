@@ -45,11 +45,16 @@ public class UserService {
             throw new BadRequestException("Email already exists");
         }
 
+        validatePassword(dto.getPassword());
+
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setFirstName(SanitizeUtil.sanitize(dto.getFirstName()));
         user.setLastName(SanitizeUtil.sanitize(dto.getLastName()));
+
+        user.setAddress(SanitizeUtil.sanitize(dto.getAddress()));
+        user.setPhoneNumber(dto.getPhoneNumber());
 
         user.setHashPassword(passwordEncoder.encode(dto.getPassword()));
         user.setUserType(UserType.USER);
